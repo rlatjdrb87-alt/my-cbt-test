@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT 온라인 시험장</title>
+    <style>
+        /* 기본 스타일 설정 (흑백 및 전문적인 CBT 스타일) */
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #222;
+            border-bottom: 2px solid #222;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+        .quiz-container {
+            margin-top: 20px;
+        }
+        .quiz-section {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .question {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            margin-bottom: 8px;
+        }
+        .options label {
+            display: block;
+            padding: 10px 12px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .options label:hover {
+            background-color: #f0f0f0;
+            border-color: #888;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        /* 채점 결과 및 해설 스타일 */
+        .result-box {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .result-box.correct {
+            background-color: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+            color: #2e7d32;
+        }
+        .result-box.wrong {
+            background-color: #ffebee;
+            border-left: 5px solid #c62828;
+            color: #c62828;
+        }
+        .explanation {
+            margin-top: 8px;
+            color: #555;
+            font-weight: normal;
+            border-top: 1px dotted #ccc;
+            padding-top: 8px;
+        }
+
+        /* 제어 버튼 */
+        .score-summary {
+            display: none;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f1f3f5;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background-color: #343a40;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #212529;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CBT 산업안전기사 모의고사 (10문제)</h1>
+    
+    <div id="quiz-form" class="quiz-container">
+        </div>
+
+    <div id="score-display" class="score-summary"></div>
+    <button id="submit-btn" class="btn-submit" onclick="gradeQuiz()">정답 제출 및 채점하기</button>
+</div>
+
+<script>
+    // 10문제 데이터 배열
+    const quizData = [
+        {
+            id: 98,
+            question: "98. 다음 중 방진마스크의 구비 조건으로 적절하지 않은 것은?",
+            options: [
+                "① 흡기밸브는 미약한 호흡에 대하여 확실하고 예민하게 작동하도록 할 것",
+                "② 쉽게 착용되어야 하고 착용하였을 때 안면부가 안면에 밀착되어 공기가 새지 않을 것",
+                "③ 여과재는 여과성능이 우수하고 인체에 장해를 주지 않을 것",
+                "④ 흡·배기밸브는 외부의 힘에 의하여 손상되지 않도록 흡·배기 저항이 높을 것"
+            ],
+            answer: 4,
+            explanation: "방진마스크는 원활한 호흡을 위해 흡·배기 저항이 낮아야 합니다."
+        },
+        {
+            id: 99,
+            question: "99. 버드(Bird)의 재해발생에 관한 연쇄이론 중 직접적인 원인은 몇 단계에 해당하는가?",
+            options: ["① 1단계", "② 2단계", "③ 3단계", "④ 4단계"],
+            answer: 3,
+            explanation: "버드의 신 도미노 이론: 1단계 관리부족 -> 2단계 기본원인 -> 3단계 직접원인 -> 4단계 사고 -> 5단계 재해"
+        },
+        {
+            id: 100,
+            question: "100. 안전교육의 3요소에 해당되지 않는 것은?",
+            options: ["① 강사", "② 교육방법", "③ 수강자", "④ 교재"],
+            answer: 2,
+            explanation: "안전교육의 3요소는 강사, 수강자, 교재입니다. 교육방법은 포함되지 않습니다."
+        },
+        {
+            id: 101,
+            question: "101. ABE종 안전모에 대하여 내수성 시험을 할 때 물에 담그기 전의 질량이 400g 이고, 물에 담근 후의 질량이 410g 이었다면 질량증가율과 합격여부로 옳은 것은?",
+            options: [
+                "① 질량증가율 : 2.5%, 합격여부 : 불합격",
+                "② 질량증가율 : 2.5%, 합격여부 : 합격",
+                "③ 질량증가율 : 102.5%, 합격여부 : 불합격",
+                "④ 질량증가율 : 102.5%, 합격여부 : 합격"
+            ],
+            answer: 1,
+            explanation: "질량증가율 = ((410 - 400) / 400) * 100 = 2.5% 입니다. 성능기준상 내수성은 질량증가율이 1% 미만이어야 하므로 불합격입니다."
+        },
+        {
+            id: 102,
+            question: "102. 시몬즈(Simonds)의 재해 손실비용 산정 방식에 있어 비보험 코스트에 포함되지 않는 것은?",
+            options: [
+                "① 영구 전노동불능 상해",
+                "② 영구 부분노동불능 상해",
+                "③ 일시 전노동불능 상해",
+                "④ 일시 부분노동불능 상해"
+            ],
+            answer: 1,
+            explanation: "사망 및 영구 전노동불능 상해는 시몬즈 방식에서 비보험 코스트가 아닌 '보험 코스트'에 포함됩니다."
+        },
+        {
+            id: 103,
+            question: "103. 아담스(Edward Adams)의 사고연쇄 반응이론 중 관리자 의사결정을 잘못하거나 감독자가 관리적 잘못을 하였을 때의 단계에 해당하는 것은?",
+            options: ["① 사고", "② 작전적 에러", "③ 관리구조", "④ 전술적 에러"],
+            answer: 2,
+            explanation: "아담스 이론의 2단계인 '작전적 에러'는 관리자의 의사결정 잘못이나 감독자의 관리적 결함을 의미합니다."
+        },
+        {
+            id: 104,
+            question: "104. 다음 중 정기점검에 관한 설명으로 가장 적합한 것은?",
+            options: [
+                "① 안전강조 기간, 방화점검 기간에 실시하는 점검",
+                "② 사고 발생 이후 곧바로 외부 전문가에 의하여 실시하는 점검",
+                "③ 작업자에 의해 매일 작업 전, 중, 후에 해당 작업설비에 대하여 수시로 실시하는 점검",
+                "④ 기계, 기구, 시설 등에 대하여 주, 월, 또는 분기 등 지정된 날짜에 실시하는 점검"
+            ],
+            answer: 4,
+            explanation: "정기점검은 일정 기간(주, 월, 분기 등)마다 정해진 계획에 따라 실시하는 점검을 뜻합니다."
+        },
+        {
+            id: 105,
+            question: "105. 하인리히 사고예방대책의 기본원리 5단계로 옳은 것은?",
+            options: [
+                "① 조직 → 사실의 발견 → 분석 → 시정방법의 선정 → 시정책의 적용",
+                "② 조직 → 분석 → 사실의 발견 → 시정방법의 선정 → 시정책의 적용",
+                "③ 사실의 발견 → 조직 → 분석 → 시정방법의 선정 → 시정책의 적용",
+                "④ 사실의 발견 → 분석 → 조직 → 시정방법의 선정 → 시정책의 적용"
+            ],
+            answer: 1,
+            explanation: "하인리히 예방대책 5단계: 1단계 조직 -> 2단계 사실의 발견 -> 3단계 분석 -> 4단계 시정방법 선정 -> 5단계 시정책 적용"
+        },
+        {
+            id: 106,
+            question: "106. 안전점검표(check list)에 포함되어야 할 사항이 아닌 것은?",
+            options: ["① 점검대상", "② 판정기준", "③ 점검방법", "④ 조치결과"],
+            answer: 4,
+            explanation: "조치결과는 점검을 실제로 수행한 후에 기록하는 결과물이며, 점검표 양식 자체에 미리 포함되는 기본 항목이 아닙니다."
+        },
+        {
+            id: 107,
+            question: "107. A사업장의 강도율이 2.5이고, 연간 재해발생 건수가 12건, 연간 총 근로 시간수가 120만 시간 일 때 이 사업장의 종합재해지수는 약 얼마인가?",
+            options: ["① 1.6", "② 5.0", "③ 27.6", "④ 230"],
+            answer: 2,
+            explanation: "도수율 = (12 / 1,200,000) * 1,000,000 = 10입니다. 종합재해지수(FSI) = √(도수율 * 강도율) = √(10 * 2.5) = √25 = 5.0 입니다."
+        }
+    ];
+
+    // 문제를 화면에 생성하는 함수
+    function renderQuiz() {
+        const quizForm = document.getElementById('quiz-form');
+        let html = '';
+
+        quizData.forEach((q) => {
+            html += `
+                <div class="quiz-section" id="section-${q.id}">
+                    <div class="question">${q.question}</div>
+                    <ul class="options">
+            `;
+            
+            q.options.forEach((option, i) => {
+                html += `
+                    <li>
+                        <label>
+                            <input type="radio" name="question-${q.id}" value="${i + 1}">
+                            ${option}
+                        </label>
+                    </li>
+                `;
+            });
+
+            html += `
+                    </ul>
+                    <div class="result-box" id="result-${q.id}"></div>
+                </div>
+            `;
+        });
+
+        quizForm.innerHTML = html;
+    }
+
+    // 채점하기 함수
+    function gradeQuiz() {
+        let score = 0;
+        let allAnswered = true;
+
+        // 먼저 다 풀었는지 검사
+        for (let q of quizData) {
+            const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+                break;
+            }
+        }
+
+        if (!allAnswered) {
+            alert("아직 풀지 않은 문제가 있습니다! 모든 문제를 풀고 제출해 주세요.");
+            return;
+        }
+
+        // 실제 채점 및 해설 공개
+        quizData.forEach(q => {
+            const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
+            const userAnswer = parseInt(selected.value);
+            const resultBox = document.getElementById(`result-${q.id}`);
+            
+            if (userAnswer === q.answer) {
+                score++;
+                resultBox.className = "result-box correct";
+                resultBox.innerHTML = `<strong>⭕ 정답입니다!</strong>`;
+            } else {
+                resultBox.className = "result-box wrong";
+                resultBox.innerHTML = `<strong>❌ 오답입니다. (내가 고른 답: ${userAnswer}번 / 정답: ${q.answer}번)</strong>`;
+            }
+
+            // 해설 추가 표시
+            resultBox.innerHTML += `<div class="explanation"><strong>[해설]</strong> ${q.explanation}</div>`;
+            resultBox.style.display = "block";
+        });
+
+        // 총점 표시 및 상단으로 스크롤
+        const scoreDisplay = document.getElementById('score-display');
+        scoreDisplay.innerHTML = `🎉 채점 완료! 총 10문제 중 ${score}문제를 맞추셨습니다. (${score * 10}점)`;
+        scoreDisplay.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // 제출 버튼 변경
+        document.getElementById('submit-btn').innerText = "채점 완료 (결과는 아래 각 문제에서 확인)";
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('submit-btn').style.backgroundColor = "#aaa";
+    }
+
+    // 페이지 로드 시 문제 보이기
+    renderQuiz();
+</script>
+
+</body>
+</html>
