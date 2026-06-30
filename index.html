@@ -1,330 +1,2512 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT 온라인 시험장</title>
-    <style>
-        /* 기본 스타일 설정 (흑백 및 전문적인 CBT 스타일) */
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-        h1 {
-            text-align: center;
-            color: #222;
-            border-bottom: 2px solid #222;
-            padding-bottom: 15px;
-            margin-top: 0;
-        }
-        .quiz-container {
-            margin-top: 20px;
-        }
-        .quiz-section {
-            margin-bottom: 35px;
-            padding-bottom: 25px;
-            border-bottom: 1px dashed #ddd;
-        }
-        .question {
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-        .options {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-        .options li {
-            margin-bottom: 8px;
-        }
-        .options label {
-            display: block;
-            padding: 10px 12px;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .options label:hover {
-            background-color: #f0f0f0;
-            border-color: #888;
-        }
-        .options input[type="radio"] {
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        
-        /* 채점 결과 및 해설 스타일 */
-        .result-box {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .result-box.correct {
-            background-color: #e8f5e9;
-            border-left: 5px solid #2e7d32;
-            color: #2e7d32;
-        }
-        .result-box.wrong {
-            background-color: #ffebee;
-            border-left: 5px solid #c62828;
-            color: #c62828;
-        }
-        .explanation {
-            margin-top: 8px;
-            color: #555;
-            font-weight: normal;
-            border-top: 1px dotted #ccc;
-            padding-top: 8px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>산업안전기사 CBT</title>
+  <style>
+    :root {
+      --bg: #f2f4f7;
+      --panel: #ffffff;
+      --line: #d9dde3;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --dark: #111827;
+      --blue: #1d4ed8;
+      --blue-light: #e8f0ff;
+      --green: #15803d;
+      --green-light: #e8f7ee;
+      --red: #b91c1c;
+      --red-light: #fdecec;
+      --yellow: #f59e0b;
+      --yellow-light: #fff7df;
+    }
 
-        /* 제어 버튼 */
-        .score-summary {
-            display: none;
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f1f3f5;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-        }
-        .btn-submit {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            background-color: #343a40;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        .btn-submit:hover {
-            background-color: #212529;
-        }
-    </style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .topbar {
+      background: var(--dark);
+      color: #fff;
+      padding: 14px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-title {
+      font-size: 20px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .topbar-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .layout {
+      width: min(1180px, calc(100% - 28px));
+      margin: 18px auto;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 18px;
+    }
+
+    .exam-panel,
+    .side-panel,
+    .result-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(17, 24, 39, 0.06);
+    }
+
+    .exam-panel {
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exam-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      background: #fbfcfe;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .exam-head strong { font-size: 18px; }
+
+    .exam-body {
+      padding: 26px 28px;
+      flex: 1;
+    }
+
+    .question-number {
+      font-size: 15px;
+      color: var(--blue);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .question-text {
+      font-size: 22px;
+      line-height: 1.55;
+      font-weight: 800;
+      margin-bottom: 26px;
+      word-break: keep-all;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px 16px;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      cursor: pointer;
+      background: #fff;
+      transition: 0.15s;
+      line-height: 1.45;
+      font-size: 17px;
+      min-height: 58px;
+    }
+
+    .option:hover {
+      border-color: #9ca3af;
+      background: #fafafa;
+    }
+
+    .option input {
+      margin-top: 4px;
+      transform: scale(1.25);
+      accent-color: var(--blue);
+    }
+
+    .option.selected {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      font-weight: 800;
+    }
+
+    .option.correct-answer {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+
+    .option.wrong-answer {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+
+    .exam-foot {
+      padding: 18px 22px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #fbfcfe;
+      border-radius: 0 0 12px 12px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 800;
+      border-radius: 9px;
+      padding: 12px 16px;
+      font-size: 15px;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .btn-light {
+      background: #eef1f5;
+      color: var(--dark);
+      border: 1px solid #d5d9df;
+    }
+
+    .btn-dark {
+      background: var(--dark);
+      color: #fff;
+    }
+
+    .btn-blue {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .btn-red {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .side-panel {
+      padding: 16px;
+      align-self: start;
+      position: sticky;
+      top: 78px;
+    }
+
+    .side-title {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .progress-text {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .page-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 8px;
+      font-size: 13px;
+    }
+
+    .page-btn.active {
+      background: var(--dark);
+      color: #fff;
+      border-color: var(--dark);
+    }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .nav-num {
+      height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-size: 15px;
+      padding: 0;
+    }
+
+    .nav-num.current {
+      outline: 3px solid rgba(29, 78, 216, 0.25);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .nav-num.answered {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .nav-num.marked {
+      position: relative;
+      border-color: var(--yellow);
+      background: var(--yellow-light);
+      color: #92400e;
+    }
+
+    .nav-num.correct {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    .nav-num.wrong {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      margin: 12px 0 16px;
+    }
+
+    .legend span::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      border-radius: 3px;
+      margin-right: 6px;
+      vertical-align: -1px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .legend .lg-current::before {
+      border-color: var(--blue);
+      outline: 2px solid rgba(29, 78, 216, 0.25);
+    }
+
+    .legend .lg-answered::before {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .legend .lg-marked::before {
+      background: var(--yellow-light);
+      border-color: var(--yellow);
+    }
+
+    .side-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .result-panel {
+      display: none;
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto 18px;
+      padding: 20px;
+    }
+
+    .result-title {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .score-big {
+      font-size: 36px;
+      font-weight: 900;
+      margin: 8px 0 6px;
+    }
+
+    .score-detail {
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .explanation {
+      margin-top: 18px;
+      background: #f8fafc;
+      border-left: 6px solid var(--blue);
+      padding: 16px;
+      border-radius: 8px;
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .status-line {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-weight: 900;
+      display: none;
+    }
+
+    .status-line.correct {
+      display: block;
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .status-line.wrong {
+      display: block;
+      background: var(--red-light);
+      color: var(--red);
+    }
+
+    .mark-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .mark-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--yellow);
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        position: static;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .topbar-info {
+        justify-content: flex-start;
+      }
+
+      .question-text {
+        font-size: 19px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <header class="topbar">
+    <div class="topbar-title">산업안전기사 필기 CBT</div>
+    <div class="topbar-info">
+      <span class="pill" id="page-title">1페이지 / 10문제</span>
+      <span class="pill" id="timer">00:00</span>
+      <span class="pill" id="answered-count">답안 0 / 10</span>
+    </div>
+  </header>
 
-<div class="container">
-    <h1>CBT 산업안전기사 모의고사 (10문제)</h1>
-    
-    <div id="quiz-form" class="quiz-container">
+  <main class="layout">
+    <section class="exam-panel">
+      <div class="exam-head">
+        <strong id="subject-title">제1과목 : 산업재해 예방 및 안전보건교육</strong>
+        <label class="mark-row">
+          <input type="checkbox" id="mark-checkbox" onchange="toggleMark()" />
+          검토 표시
+        </label>
+      </div>
+
+      <div class="exam-body">
+        <div class="question-number" id="question-number"></div>
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div class="status-line" id="status-line"></div>
+        <div class="explanation" id="explanation" style="display:none;"></div>
+      </div>
+
+      <div class="exam-foot">
+        <div>
+          <button class="btn-light" id="prev-btn" onclick="prevQuestion()">이전 문제</button>
+          <button class="btn-light" id="next-btn" onclick="nextQuestion()">다음 문제</button>
         </div>
+        <div>
+          <button class="btn-light" id="prev-page-btn" onclick="prevPage()">이전 10문제</button>
+          <button class="btn-light" id="next-page-btn" onclick="nextPage()">다음 10문제</button>
+          <button class="btn-red" onclick="resetCurrentPage()">현재 페이지 다시 풀기</button>
+          <button class="btn-blue" id="submit-btn" onclick="submitExam()">최종 제출</button>
+        </div>
+      </div>
+    </section>
 
-    <div id="score-display" class="score-summary"></div>
-    <button id="submit-btn" class="btn-submit" onclick="gradeQuiz()">정답 제출 및 채점하기</button>
-</div>
+    <aside class="side-panel">
+      <div class="side-title">페이지 선택</div>
+      <div class="page-grid" id="page-grid"></div>
 
-<script>
-    // 1번부터 10번까지로 가공된 문제 데이터 배열
-    const quizData = [
+      <div class="side-title">답안 현황</div>
+      <div class="progress-text" id="progress-text">
+        문제 번호를 누르면 해당 문제로 이동합니다.
+      </div>
+      <div class="answer-grid" id="answer-grid"></div>
+      <div class="legend">
+        <span class="lg-current">현재 문제</span>
+        <span class="lg-answered">답안 선택</span>
+        <span class="lg-marked">검토 표시</span>
+      </div>
+      <div class="side-actions">
+        <button class="btn-dark" onclick="goFirstUnanswered()">미응답 문제로 이동</button>
+        <button class="btn-blue" id="side-submit-btn" onclick="submitExam()">최종 제출</button>
+      </div>
+    </aside>
+  </main>
+
+  <section class="result-panel" id="result-panel">
+    <div class="result-title">채점 결과</div>
+    <div class="score-big" id="score-big"></div>
+    <div class="score-detail" id="score-detail"></div>
+    <button class="btn-dark" onclick="showReviewMode()">해설 보면서 다시 확인</button>
+  </section>
+
+  <script>
+    const QUESTIONS_PER_PAGE = 10;
+
+    const quizPages = [
+      [
         {
-            id: 1,
-            question: "1. 다음 중 방진마스크의 구비 조건으로 적절하지 않은 것은?",
-            options: [
-                "① 흡기밸브는 미약한 호흡에 대하여 확실하고 예민하게 작동하도록 할 것",
-                "② 쉽게 착용되어야 하고 착용하였을 때 안면부가 안면에 밀착되어 공기가 새지 않을 것",
-                "③ 여과재는 여과성능이 우수하고 인체에 장해를 주지 않을 것",
-                "④ 흡·배기밸브는 외부의 힘에 의하여 손상되지 않도록 흡·배기 저항이 높을 것"
-            ],
-            answer: 4,
-            explanation: "방진마스크는 원활한 호흡을 위해 흡·배기 저항이 낮아야 합니다."
+          id: 1,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전관리의 조직형태 중에서 경영자(수뇌부)의 지휘와 명령이 위에서 아래로 하나의 계통이 되어 잘 전달되며 소규모 기업에 적합한 방식은?",
+          options: [
+            "① staff 방식",
+            "② line 방식",
+            "③ line-staff 방식",
+            "④ round 방식"
+          ],
+          answer: 2,
+          explanation: "라인형(직계식)은 안전관리에 관한 모든 것을 생산조직을 통해 행하는 관리 방식이다. 생산과 안전을 동시에 지시하며 소규모, 보통 100명 이하 사업장에 적용된다."
         },
         {
-            id: 2,
-            question: "2. 버드(Bird)의 재해발생에 관한 연쇄이론 중 직접적인 원인은 몇 단계에 해당하는가?",
-            options: ["① 1단계", "② 2단계", "③ 3단계", "④ 4단계"],
-            answer: 3,
-            explanation: "버드의 신 도미노 이론: 1단계 관리부족 -> 2단계 기본원인 -> 3단계 직접원인 -> 4단계 사고 -> 5단계 재해"
+          id: 2,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "관리자 교육 훈련(MTP)시간으로 가장 적당한 것은?",
+          options: [
+            "① 20시간(4시간 × 5회)",
+            "② 20시간(2시간 × 10회)",
+            "③ 40시간(4시간 × 10회)",
+            "④ 40시간(2시간 × 20회)"
+          ],
+          answer: 4,
+          explanation: "관리자 교육 훈련(MTP) 시간은 40시간이며, 일반적으로 2시간씩 20회로 구성된다."
         },
         {
-            id: 3,
-            question: "3. 안전교육의 3요소에 해당되지 않는 것은?",
-            options: ["① 강사", "② 교육방법", "③ 수강자", "④ 교재"],
-            answer: 2,
-            explanation: "안전교육의 3요소는 강사, 수강자, 교재입니다. 교육방법은 포함되지 않습니다."
+          id: 3,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "집단관리의 기본적 요소에 속하지 않는 것은?",
+          options: [
+            "① 감정",
+            "② 행위범위",
+            "③ 지위와 역할",
+            "④ 목표와 무관심"
+          ],
+          answer: 4,
+          explanation: "집단관리의 기본요소는 감정, 행위범위, 지위와 역할이다. 목표와 무관심은 기본요소에 해당하지 않는다."
         },
         {
-            id: 4,
-            question: "4. ABE종 안전모에 대하여 내수성 시험을 할 때 물에 담그기 전의 질량이 400g 이고, 물에 담근 후의 질량이 410g 이었다면 질량증가율과 합격여부로 옳은 것은?",
-            options: [
-                "① 질량증가율 : 2.5%, 합격여부 : 불합격",
-                "② 질량증가율 : 2.5%, 합격여부 : 합격",
-                "③ 질량증가율 : 102.5%, 합격여부 : 불합격",
-                "④ 질량증가율 : 102.5%, 합격여부 : 합격"
-            ],
-            answer: 1,
-            explanation: "질량증가율 = ((410 - 400) / 400) * 100 = 2.5% 입니다. 성능기준상 내수성은 질량증가율이 1% 미만이어야 하므로 불합격입니다."
+          id: 4,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전교육 중 앞의 학습이 뒤의 학습에 미치는 영향을 무엇이라 하는가?",
+          options: [
+            "① 반사(reflex)",
+            "② 반응(reaction)",
+            "③ 전이(transfer)",
+            "④ 효과(effect)"
+          ],
+          answer: 3,
+          explanation: "전이(transfer)는 한 번 학습한 결과가 다른 학습이나 반응에 영향을 주는 것을 말한다."
         },
         {
-            id: 5,
-            question: "5. 시몬즈(Simonds)의 재해 손실비용 산정 방식에 있어 비보험 코스트에 포함되지 않는 것은?",
-            options: [
-                "① 영구 전노동불능 상해",
-                "② 영구 부분노동불능 상해",
-                "③ 일시 전노동불능 상해",
-                "④ 일시 부분노동불능 상해"
-            ],
-            answer: 1,
-            explanation: "사망 및 영구 전노동불능 상해는 시몬즈 방식에서 비보험 코스트가 아닌 '보험 코스트'에 포함됩니다."
+          id: 5,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "일 중심형으로 업적에 대한 관심은 높지만 인간관계에 무관심한 리더십인 타입은?",
+          options: [
+            "① 이상형",
+            "② 권력형",
+            "③ 방임형",
+            "④ 중도형"
+          ],
+          answer: 2,
+          explanation: "권력형 리더십은 일 중심형으로 업적에 대한 관심은 높지만 인간관계에 대한 관심은 낮은 유형이다."
         },
         {
-            id: 6,
-            question: "6. 아담스(Edward Adams)의 사고연쇄 반응이론 중 관리자 의사결정을 잘못하거나 감독자가 관리적 잘못을 하였을 때의 단계에 해당하는 것은?",
-            options: ["① 사고", "② 작전적 에러", "③ 관리구조", "④ 전술적 에러"],
-            answer: 2,
-            explanation: "아담스 이론의 2단계인 '작전적 에러'는 관리자의 의사결정 잘못이나 감독자의 관리적 결함을 의미합니다."
+          id: 6,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음의 직무분석 방법 중 감독자, 동료 근로자, 그 외의 이 직무를 잘 아는 사람으로부터 성공적이지 못한 근로자와 성공적인 근로자를 구별해 내는 행동을 밝히려는 목적으로 사용되는 것은?",
+          options: [
+            "① 면접",
+            "② 직접관찰",
+            "③ 결정적 사건의 기록",
+            "④ 체계적인 일지 작성"
+          ],
+          answer: 3,
+          explanation: "결정적 사건의 기록법은 직무를 잘 아는 사람에게서 성공적인 근로자와 성공적이지 못한 근로자를 구별하는 결정적 행동 사례를 수집하는 방법이다."
         },
         {
-            id: 7,
-            question: "7. 다음 중 정기점검에 관한 설명으로 가장 적합한 것은?",
-            options: [
-                "① 안전강조 기간, 방화점검 기간에 실시하는 점검",
-                "② 사고 발생 이후 곧바로 외부 전문가에 의하여 실시하는 점검",
-                "③ 작업자에 의해 매일 작업 전, 중, 후에 해당 작업설비에 대하여 수시로 실시하는 점검",
-                "④ 기계, 기구, 시설 등에 대하여 주, 월, 또는 분기 등 지정된 날짜에 실시하는 점검"
-            ],
-            answer: 4,
-            explanation: "정기점검은 일정 기간(주, 월, 분기 등)마다 정해진 계획에 따라 실시하는 점검을 뜻합니다."
+          id: 7,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전태도교육의 순서를 보기에서 골라 올바르게 나열한 것은? [보기] ㄱ. 들어본다. ㄴ. 이해시킨다. ㄷ. 시범을 보인다. ㄹ. 평가한다.",
+          options: [
+            "① ㄱ → ㄴ → ㄷ → ㄹ",
+            "② ㄴ → ㄱ → ㄷ → ㄹ",
+            "③ ㄷ → ㄴ → ㄱ → ㄹ",
+            "④ ㄱ → ㄷ → ㄴ → ㄹ"
+          ],
+          answer: 1,
+          explanation: "안전태도교육의 순서는 들어본다 → 이해시킨다 → 시범을 보인다 → 평가한다."
         },
         {
-            id: 8,
-            question: "8. 하인리히 사고예방대책의 기본원리 5단계로 옳은 것은?",
-            options: [
-                "① 조직 → 사실의 발견 → 분석 → 시정방법의 선정 → 시정책의 적용",
-                "② 조직 → 분석 → 사실의 발견 → 시정방법의 선정 → 시정책의 적용",
-                "③ 사실의 발견 → 조직 → 분석 → 시정방법의 선정 → 시정책의 적용",
-                "④ 사실의 발견 → 분석 → 조직 → 시정방법의 선정 → 시정책의 적용"
-            ],
-            answer: 1,
-            explanation: "하인리히 예방대책 5단계: 1단계 조직 -> 2단계 사실의 발견 -> 3단계 분석 -> 4단계 시정방법 선정 -> 5단계 시정책 적용"
+          id: 8,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "조직의 지도자들이 부하직원들을 승진시킬 수 있고 봉급을 인상해주는 등의 능력이 있으므로 통제가 가능한 권한은?",
+          options: [
+            "① 위임된 권한",
+            "② 합법적 권한",
+            "③ 강압적 권한",
+            "④ 보상적 권한"
+          ],
+          answer: 4,
+          explanation: "보상적 권한은 승진, 보수 인상, 보상 제공 등으로 구성원을 통제할 수 있는 권한이다."
         },
         {
-            id: 9,
-            question: "9. 안전점검표(check list)에 포함되어야 할 사항이 아닌 것은?",
-            options: ["① 점검대상", "② 판정기준", "③ 점검방법", "④ 조치결과"],
-            answer: 4,
-            explanation: "조치결과는 점검을 실제로 수행한 후에 기록하는 결과물이며, 점검표 양식 자체에 미리 포함되는 기본 항목이 아닙니다."
+          id: 9,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "바이오리듬(Biorhythm) 가운데 판단력, 추리력과 가장 관계가 깊은 리듬은?",
+          options: [
+            "① 지성리듬",
+            "② 감성리듬",
+            "③ 육체리듬",
+            "④ 생활리듬"
+          ],
+          answer: 1,
+          explanation: "지성리듬은 일반적으로 33일 주기로 반복되며 상상력, 사고력, 기억력, 추리력, 판단력 등과 관련이 깊다."
         },
         {
-            id: 10,
-            question: "10. A사업장의 강도율이 2.5이고, 연간 재해발생 건수가 12건, 연간 총 근로 시간수가 120만 시간 일 때 이 사업장의 종합재해지수는 약 얼마인가?",
-            options: ["① 1.6", "② 5.0", "③ 27.6", "④ 230"],
-            answer: 2,
-            explanation: "도수율 = (12 / 1,200,000) * 1,000,000 = 10입니다. 종합재해지수(FSI) = √(도수율 * 강도율) = √(10 * 2.5) = √25 = 5.0 입니다."
+          id: 10,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "인간의 의식수준 단계 중 생리적 상태가 피로하고 단조로울 때 해당되는 것은?",
+          options: [
+            "① Phase I",
+            "② Phase II",
+            "③ Phase III",
+            "④ Phase IV"
+          ],
+          answer: 1,
+          explanation: "인간 의식레벨 분류에서 Phase I은 의식이 흐리고 피로, 단조로움 상태에 해당한다."
         }
+      ],
+      [
+        {
+          id: 11,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "합리적인 적성 배치시 고려되어야 할 기본사항이 아닌 것은?",
+          options: [
+            "① 인사관리의 기준 원칙에 준한다.",
+            "② 주관적인 요소를 적극 반영하여 배치한다.",
+            "③ 직무평가를 통하여 자격수준을 정한다.",
+            "④ 적성검사를 실시하여 개인의 능력을 파악한다."
+          ],
+          answer: 2,
+          explanation: "합리적인 적성 배치에서는 주관적인 요소가 아니라 객관적인 요소를 적극 반영하여 배치하여야 한다."
+        },
+        {
+          id: 12,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전 심리에서 고려되는 가장 중요한 요소는 어느 것인가?",
+          options: [
+            "① 개성과 사고력",
+            "② 지식 정도",
+            "③ 안전 규칙",
+            "④ 신체적 조건과 기능"
+          ],
+          answer: 1,
+          explanation: "사고 발생 가능성은 사람마다 위험을 인식하고 반응하는 방식인 개성에 따라 달라지며, 위기 상황을 적절히 판단하고 대응할 수 있는 사고력이 안전심리에서 가장 중요한 요소이다."
+        },
+        {
+          id: 13,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "불안전한 행동을 예방하기 위하여 수정해야 할 조건들 중 시간의 소요가 짧은 것부터 길게 나타내는 순서로 올바른 것은?",
+          options: [
+            "① 집단행위 → 개인행위 → 태도 → 지식",
+            "② 개인행위 → 태도 → 지식 → 집단행위",
+            "③ 태도 → 지식 → 집단행위 → 개인행위",
+            "④ 지식 → 태도 → 개인행위 → 집단행위"
+          ],
+          answer: 4,
+          explanation: "불안전한 행동을 예방하기 위한 수정 조건은 시간이 짧게 소요되는 것부터 지식 → 태도 → 개인행위 → 집단행위 순서이다."
+        },
+        {
+          id: 14,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "보호구 안전인증 고시에 따른 방음용 귀마개 또는 귀덮개와 관련된 용어의 정의 중 다음 ( )안에 알맞은 것은? 음압수준이란 음압을 다음 식에 따라 데시벨(dB)로 나타낸 것을 말하며 적분평균소음계(KSC1505) 또는 소음계(KSC1502)에 규정하는 소음계의 ( )특성을 기준으로 한다.",
+          options: [
+            "① A",
+            "② B",
+            "③ C",
+            "④ D"
+          ],
+          answer: 3,
+          explanation: "음압수준은 음압을 데시벨(dB)로 나타낸 것이며, 적분평균소음계 또는 소음계에 규정하는 소음계의 C특성을 기준으로 한다."
+        },
+        {
+          id: 15,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 그림과 같은 안전관리 조직의 특징으로 틀린 것은?",
+          options: [
+            "① 1000명 이상의 대규모 사업장에 적합하다.",
+            "② 생산부문은 안전에 대한 책임과 권한이 없다.",
+            "③ 사업장의 특수성에 적합한 기술연구를 전문적으로 할 수 있다.",
+            "④ 권한 다툼이나 조정 때문에 통제수속이 복잡해지며, 시간과 노력이 소모된다."
+          ],
+          answer: 1,
+          explanation: "그림은 스태프형(참모형) 안전관리 조직이다. 스태프형은 보통 중규모 사업장, 약 100~1000명 규모에 적용 가능하므로 1000명 이상의 대규모 사업장에 적합하다는 설명은 틀리다."
+        },
+        {
+          id: 16,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "성인학습의 원리에 해당되지 않는 것은?",
+          options: [
+            "① 간접경험의 원리",
+            "② 자발학습의 원리",
+            "③ 상호학습의 원리",
+            "④ 참여교육의 원리"
+          ],
+          answer: 1,
+          explanation: "성인학습의 원리에는 자발학습의 원리, 상호학습의 원리, 참여교육의 원리, 자기주도성의 원리 등이 있다. 간접경험의 원리는 해당되지 않는다."
+        },
+        {
+          id: 17,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 일반적으로 피로의 회복대책에 가장 효과적인 방법은?",
+          options: [
+            "① 휴식과 수면을 취한다.",
+            "② 충분한 영양(음식)을 섭취한다.",
+            "③ 땀을 낼 수 있는 근력운동을 한다.",
+            "④ 모임 참여, 동료와의 대화 등을 통하여 기분을 전환한다."
+          ],
+          answer: 1,
+          explanation: "피로 회복에는 휴식과 수면을 취하는 것이 가장 효과적이다."
+        },
+        {
+          id: 18,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 안전점검 방법에서 육안점검과 가장 관련이 깊은 것은?",
+          options: [
+            "① 테스트 해머 점검",
+            "② 부식·마모 점검",
+            "③ 가스검지기 점검",
+            "④ 온도계 점검"
+          ],
+          answer: 2,
+          explanation: "부식과 마모는 눈으로 직접 확인할 수 있으므로 육안점검과 가장 관련이 깊다."
+        },
+        {
+          id: 19,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 버드(Bird)의 사고 발생 도미노 이론에서 직접원인은 무엇이라고 하는가?",
+          options: [
+            "① 통제",
+            "② 징후",
+            "③ 손실",
+            "④ 위험"
+          ],
+          answer: 2,
+          explanation: "버드의 신 도미노 이론은 1단계 관리 또는 통제의 부족, 2단계 기본원인, 3단계 직접원인 또는 징후, 4단계 사고, 5단계 재해 또는 상해 순서이다."
+        },
+        {
+          id: 20,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 학습목적을 세분하여 구체적으로 결정한 것을 무엇이라 하는가?",
+          options: [
+            "① 주제",
+            "② 학습목표",
+            "③ 학습정도",
+            "④ 학습성과"
+          ],
+          answer: 4,
+          explanation: "학습성과란 학습목적을 세분하여 구체적으로 결정한 것을 말한다."
+        }
+        ],
+      [
+        {
+          id: 21,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "토의식 교육방법 중 새로운 교재를 제시하고 거기에서의 문제점을 피교육자로 하여금 제기하게 하거나, 의견을 여러가지 방법으로 발표하게 하고, 다시 깊이 파고 들어가 토의하는 방법은?",
+          options: [
+            "① 포럼(Forum)",
+            "② 심포지엄(Symposium)",
+            "③ 패널 디스커션(Panel discussion)",
+            "④ 버즈세션(Buzz session)"
+          ],
+          answer: 1,
+          explanation: "포럼(Forum)은 새로운 교재를 제시하고 거기에서의 문제점을 제기하게 하거나 여러 의견을 발표하게 한 뒤, 다시 깊이 파고들어 토의하는 방법이다."
+        },
+        {
+          id: 22,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 하인리히의 재해 손실비용 산정에 있어서 1 : 4의 비율은 각각 무엇을 의미하는가?",
+          options: [
+            "① 치료비의 보상비의 비율",
+            "② 급료와 손해보상의 비율",
+            "③ 직접손실비와 간접손실비의 비율",
+            "④ 보험지급비와 비보험손실비의 비율"
+          ],
+          answer: 3,
+          explanation: "하인리히의 총 재해비용은 직접비와 간접비로 구분되며, 일반적으로 직접손실비 : 간접손실비 = 1 : 4로 본다."
+        },
+        {
+          id: 23,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 안전관리조직의 목적과 가장 거리가 먼 것은?",
+          options: [
+            "① 조직적인 사고예방활동",
+            "② 위험제거기술의 수준 향상",
+            "③ 재해손실의 산정 및 작업통제",
+            "④ 조직간 종적·횡적 신속한 정보처리와 유대강화"
+          ],
+          answer: 3,
+          explanation: "안전관리조직의 목적은 조직적인 사고예방활동, 위험제거기술의 수준 향상, 조직간 종적·횡적 신속한 정보처리와 유대강화 등이다. 재해손실의 산정 및 작업통제는 거리가 멀다."
+        },
+        {
+          id: 24,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "베어링을 생산하는 사업장에 300명의 근로자가 근무하고 있다. 1년에 21건의 재해가 발생하였다면 이 사업장에서 근로자 1명이 평생 작업시 약 몇 건의 재해를 당할 수 있겠는가? (단, 1일 8시간씩, 1년 300일 근무하며, 평생근로 시간은 10만시간으로 가정한다.)",
+          options: [
+            "① 1건",
+            "② 3건",
+            "③ 5건",
+            "④ 6건"
+          ],
+          answer: 2,
+          explanation: "도수율 = 재해건수 / 연근로시간수 × 10^6 = 21 / (300 × 8 × 300) × 10^6 = 약 29.17이다. 환산도수율 = 도수율 × 0.1 이므로 약 2.917, 즉 약 3건이다."
+        },
+        {
+          id: 25,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 구체적인 동기유발요인에 속하지 않는 것은?",
+          options: [
+            "① 기회",
+            "② 자세",
+            "③ 인정",
+            "④ 참여"
+          ],
+          answer: 2,
+          explanation: "구체적인 동기유발요인에는 성과, 권력, 독자성, 기회, 인정, 참여 등이 포함된다. 자세는 이에 속하지 않는다."
+        },
+        {
+          id: 26,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 불안전한 행동에 속하지 않는 것은?",
+          options: [
+            "① 보호구 미착용",
+            "② 부적절한 도구 사용",
+            "③ 방호장치 미설치",
+            "④ 안전장치 기능 제거"
+          ],
+          answer: 3,
+          explanation: "불안전한 행동은 보호구 잘못 사용, 부적절한 도구 사용, 안전장치 기능 제거 등이며, 방호장치 미설치는 불안전한 상태(물적요인)에 해당한다."
+        },
+        {
+          id: 27,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 부주의의 발생 원인별 대책방법이 올바르게 짝지어진 것은?",
+          options: [
+            "① 소질적 문제 - 안전교육",
+            "② 경험, 미경험 - 적성배치",
+            "③ 의식의 우회 - 작업환경 개선",
+            "④ 작업순서의 부적합 - 인간공학적 접근"
+          ],
+          answer: 4,
+          explanation: "부주의의 발생 원인별 대책은 소질적 문제-적성배치, 경험·미경험-안전교육, 의식의 우회-카운슬링, 작업순서의 부적합-인간공학적 접근이 올바른 짝이다."
+        },
+        {
+          id: 28,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 산업안전보건법령상 [그림]에 해당하는 안전·보건표시의 명칭으로 옳은 것은?",
+          options: [
+            "① 물체이동 경고",
+            "② 양중기운행 경고",
+            "③ 낙하위험 경고",
+            "④ 매달린물체 경고"
+          ],
+          answer: 4,
+          explanation: "제시된 표지는 매달린 물체가 있는 위험을 나타내는 경고표지이므로 '매달린물체 경고'가 옳다."
+        },
+        {
+          id: 29,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 부주의의 발생 현상으로 혼미한 정신상태에서 심신의 피로나 단조로운 반복작업시 일어나는 현상은?",
+          options: [
+            "① 의식의 과잉",
+            "② 의식의 집중",
+            "③ 의식의 우회",
+            "④ 의식수준의 저하"
+          ],
+          answer: 4,
+          explanation: "혼미한 정신상태에서 심신의 피로나 단조로운 반복작업 시 일어나는 부주의 현상은 의식수준의 저하이다."
+        },
+        {
+          id: 30,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "공기 중 산소농도가 부족하고, 공기 중에 미립자상 물질이 부유하는 장에서 사용하기에 가장 적절한 보호구는?",
+          options: [
+            "① 면마스크",
+            "② 방독마스크",
+            "③ 송기마스크",
+            "④ 방진마스크"
+          ],
+          answer: 3,
+          explanation: "산소결핍 장소에서는 여과식이 아니라 외부에서 공기를 공급받는 송기마스크를 착용해야 한다."
+        }
+       ],
+      [
+        {
+          id: 31,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 학습 전이의 조건과 가장 거리가 먼 것은?",
+          options: [
+            "① 학습자의 태도 요인",
+            "② 학습자의 지능 요인",
+            "③ 학습 자료의 유사성의 요인",
+            "④ 선행학습과 후행학습의 공간적 요인"
+          ],
+          answer: 4,
+          explanation: "학습 전이의 조건에는 학습자의 태도 요인, 학습자의 지능 요인, 학습 자료의 유사성 요인 등이 있다. 선행학습과 후행학습의 공간적 요인은 거리가 멀다."
+        },
+        {
+          id: 32,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 재해 원인의 4M에 대한 내용이 틀린 것은?",
+          options: [
+            "① Media : 작업정보, 작업환경",
+            "② Machine : 기계설비의 고장, 결함",
+            "③ Management : 작업방법, 인간관계",
+            "④ Man : 동료나 상사, 본인 이외의 사람"
+          ],
+          answer: 3,
+          explanation: "4M에서 Man은 본인 및 사람, 인간관계 등을 의미하고, Machine은 기계설비의 고장·결함, Media는 작업정보·작업방법·작업환경, Management는 작업관리·법규준수 등을 의미한다. 따라서 Management를 작업방법, 인간관계로 설명한 것은 틀리다."
+        },
+        {
+          id: 33,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "도수율이 12.5인 사업장에서 근로자 1명에게 평생 동안 약 몇 건의 재해가 발생하겠는가? (단, 평생근로년수는 40년, 평생근로시간은 잔업시간 4000시간을 포함하여 80000시간으로 가정한다.)",
+          options: [
+            "① 1건",
+            "② 2건",
+            "③ 4건",
+            "④ 12건"
+          ],
+          answer: 1,
+          explanation: "환산도수율 = 도수율 × 0.08 이므로 12.5 × 0.08 = 1건이다."
+        },
+        {
+          id: 34,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "학습이론 중 자극과 반응 이론이라 볼 수 없는 것은?",
+          options: [
+            "① Kohler의 통찰설",
+            "② Thorndike의 시행착오설",
+            "③ Pavlov의 조건반사설",
+            "④ Skinner의 조작적 조건화설"
+          ],
+          answer: 1,
+          explanation: "자극과 반응 이론에는 Thorndike의 시행착오설, Pavlov의 조건반사설, Skinner의 조작적 조건화설 등이 있다. Kohler의 통찰설은 이에 해당하지 않는다."
+        },
+        {
+          id: 35,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "매슬로우의 욕구단계이론에서 편견없이 받아들이는 성향, 타인과의 거리를 유지하며 사생활을 즐기거나 창의적 성격으로 봉사, 특별히 좋아하는 사람과 긴밀한 관계를 유지하려는 인간의 욕구에 해당하는 것은?",
+          options: [
+            "① 생리적 욕구",
+            "② 사회적 욕구",
+            "③ 자아실현의 욕구",
+            "④ 안전에 대한 욕구"
+          ],
+          answer: 3,
+          explanation: "매슬로우의 욕구단계 중 자아실현의 욕구는 가장 상위 단계의 욕구로, 자신의 가능성을 실현하고 더 나은 단계로 나아가려는 성장 욕구이다."
+        },
+        {
+          id: 36,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "직무적성검사의 특징과 가장 거리가 먼 것은?",
+          options: [
+            "① 재현성",
+            "② 객관성",
+            "③ 타당성",
+            "④ 표준화"
+          ],
+          answer: 1,
+          explanation: "직무적성검사의 특징에는 객관성, 타당성, 표준화, 신뢰성, 규준성 등이 있다. 재현성은 가장 거리가 멀다."
+        },
+        {
+          id: 37,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 재해예방을 위한 시정책인 '3E'에 해당하지 않는 것은?",
+          options: [
+            "① Education",
+            "② Energy",
+            "③ Engineering",
+            "④ Enforcement"
+          ],
+          answer: 2,
+          explanation: "재해예방의 3E는 기술(Engineering), 교육(Education), 규제 또는 단속(Enforcement)이다. Energy는 3E에 해당하지 않는다."
+        },
+        {
+          id: 38,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "[표]는 A작업장을 하루 10회 순회하면서 적발된 불안전한 행동건수이다. A작업장의 1일 불안전한 행동률은 약 얼마인가?",
+          options: [
+            "① 0.07%",
+            "② 0.7%",
+            "③ 7%",
+            "④ 70%"
+          ],
+          answer: 2,
+          explanation: "불안전한 행동률 = 불안전한 행동건수 / 총관찰횟수 × 100 이다. 표의 불안전한 행동건수 합계는 1+2+1+2+1 = 7이고, 총관찰횟수는 100명 × 10회 = 1000이다. 따라서 7 / 1000 × 100 = 0.7%이다."
+        },
+        {
+          id: 39,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 구체적인 동기유발요인과 가장 거리가 먼 것은?",
+          options: [
+            "① 작업",
+            "② 성과",
+            "③ 권력",
+            "④ 독자성"
+          ],
+          answer: 1,
+          explanation: "구체적인 동기유발요인에는 성과, 권력, 독자성, 기회, 인정, 참여 등이 포함된다. 작업은 이에 해당하지 않는다."
+        },
+        {
+          id: 40,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업안전보건법상 고용노동부장관은 자율안전확인대상 기계·기구 등의 안전에 관한 성능이 자율안전기준에 맞지 아니하게 된 경우 관계사항을 신고한 자에게 몇 개월 이내의 기간을 정하여 자율안전확인표시의 사용을 금지하거나 자율안전기준에 맞게 개선하도록 명할 수 있는가?",
+          options: [
+            "① 1",
+            "② 3",
+            "③ 6",
+            "④ 12"
+          ],
+          answer: 3,
+          explanation: "고용노동부장관은 신고된 자율안전확인대상 기계 등의 안전에 관한 성능이 자율안전기준에 맞지 아니하게 된 경우, 신고한 자에게 6개월 이내의 기간을 정하여 표시 사용 금지 또는 개선을 명할 수 있다."
+        }
+          ],
+      [
+        {
+          id: 41,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 인간의 적성과 안전과의 관계를 가장 올바르게 설명한 것은?",
+          options: [
+            "① 사고를 일으키는 것은 그 작업에 적성이 맞지 않는 사람이 그 일을 수행한 이유이므로, 반드시 적성검사를 실시하여 그 결과에 따라 작업자를 배치하여야 한다.",
+            "② 인간의 감각기별 반응시간은 시각, 청각, 통각 순으로 빠르므로 비상시 비상등을 먼저 켜야 한다.",
+            "③ 사생활에 중대한 변화가 있는 사람이 사고를 유발할 가능성이 높으므로 그러한 사람들에게는 특별한 배려가 필요하다.",
+            "④ 일반적으로 집단의 심적 태도를 교정하는 것보다 개인의 심적 태도를 교정하는 것이 더 용이하다."
+          ],
+          answer: 3,
+          explanation: "사생활에 중대한 변화가 있는 사람은 사고를 유발할 가능성이 높으므로 특별한 배려가 필요하다. 적성에 맞아도 부주의에 의한 사고가 발생할 수 있고, 감각기별 반응시간은 청각, 시각, 통각 순으로 빠르다."
+        },
+        {
+          id: 42,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "휴먼에러(Human Error) 원인의 레벨(Level)을 분류할 때 작업조건이나 작업형태 중에서 다른 문제가 생겨서 그것 때문에 필요한 사항을 실행할 수 없는 에러를 무엇이라고 하는가?",
+          options: [
+            "① Command Error",
+            "② Primary Error",
+            "③ Secondary Error",
+            "④ Third Error"
+          ],
+          answer: 3,
+          explanation: "Secondary Error는 작업조건이나 작업형태 중 다른 문제가 생겨 그로 인해 필요한 사항을 실행할 수 없는 에러를 말한다."
+        },
+        {
+          id: 43,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "리더십의 행동이론 중 관리그리드(managerial grid) 이론에서 리더의 행동유형과 경향을 올바르게 연결한 것은?",
+          options: [
+            "① (1.1)형 - 무관심형",
+            "② (1.9)형 - 과업형",
+            "③ (9.1)형 - 인기형",
+            "④ (5.5)형 - 이상형"
+          ],
+          answer: 1,
+          explanation: "관리그리드 이론에서 (1.1)형은 무관심형, (1.9)형은 인기형, (9.1)형은 과업형, (5.5)형은 타협형, (9.9)형은 이상형이다."
+        },
+        {
+          id: 44,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "버드(Bird)의 재해발생이론에 따를 경우 15건의 경상(물적 또는 인적 상해)사고가 발생하였다면 무상해, 무사고(위험순간)는 몇 건이 발생하겠는가?",
+          options: [
+            "① 300",
+            "② 450",
+            "③ 600",
+            "④ 900"
+          ],
+          answer: 4,
+          explanation: "버드의 재해구성비율은 1 : 10 : 30 : 600이다. 경상 10건에 무상해·무사고 600건이 대응하므로, 경상 15건이면 600 × 1.5 = 900건이다."
+        },
+        {
+          id: 45,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "학습지도의 형태 중 토의법에 해당되지 않는 것은?",
+          options: [
+            "① 패널 디스커션(panel discussion)",
+            "② 포럼(forum)",
+            "③ 구안법(project method)",
+            "④ 버즈 세션(buzz session)"
+          ],
+          answer: 3,
+          explanation: "토의식 교육방법에는 포럼, 심포지엄, 버즈세션, 패널 디스커션, 케이스 메소드 등이 있다. 구안법(project method)은 토의법에 해당하지 않는다."
+        },
+        {
+          id: 46,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전인증대상 방음용 귀마개의 일반구조에 관한 설명으로 틀린 것은?",
+          options: [
+            "① 귀의 구조상 내이도에 잘 맞을 것",
+            "② 귀마개를 착용할 때 귀마개의 모든 부분이 착용자에게 물리적인 손상을 유발시키지 않을 것",
+            "③ 사용 중에 쉽게 빠지지 않을 것",
+            "④ 귀마개는 사용수명 동안 피부자극, 피부질환, 알레르기 반응 혹은 그 밖에 다른 건강상의 부작용을 일으키지 않을 것"
+          ],
+          answer: 1,
+          explanation: "방음용 귀마개는 귀의 구조상 외이도에 잘 맞아야 한다. 보기 ①의 내이도는 틀린 표현이다."
+        },
+        {
+          id: 47,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 맥그리거(Douglas McGregor)의 X이론과 Y이론에 관한 관리 처방으로 가장 적절한 것은?",
+          options: [
+            "① 목표에 의한 관리는 Y이론의 관리 처방에 해당된다.",
+            "② 직무의 확장은 X이론의 관리 처방에 해당된다.",
+            "③ 상부책임제도의 강화는 Y이론의 관리 처방에 해당된다.",
+            "④ 분권화 및 권한의 위임은 X이론의 관리 처방에 해당된다."
+          ],
+          answer: 1,
+          explanation: "Y이론의 관리 처방에는 목표에 의한 관리, 직무의 확장, 분권화 및 권한의 위임 등이 포함된다. X이론은 상부책임제도 강화, 권위주의적 리더십 등과 관련된다."
+        },
+        {
+          id: 48,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 산업안전보건법령상 안전·보건표지에 있어 금지 표지의 종류가 아닌 것은?",
+          options: [
+            "① 금연",
+            "② 접촉금지",
+            "③ 보행금지",
+            "④ 차량통행금지"
+          ],
+          answer: 2,
+          explanation: "금지표지에는 출입금지, 보행금지, 차량통행금지, 사용금지, 탑승금지, 금연, 화기금지, 물체이동금지 등이 있다. 접촉금지는 금지표지의 종류가 아니다."
+        },
+        {
+          id: 49,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "사고요인이 되는 정신적 요소 중 개성적 결함 요인에 해당하지 않는 것은?",
+          options: [
+            "① 방심 및 공상",
+            "② 도전적인 마음",
+            "③ 과도한 집착력",
+            "④ 다혈질 및 인내심 부족"
+          ],
+          answer: 1,
+          explanation: "개성적 결함 요인에는 도전적인 마음, 과도한 집착력, 다혈질 및 인내심 부족, 사치 및 허영심 등이 있다. 방심 및 공상은 개성적 결함 요인에 해당하지 않는다."
+        },
+        {
+          id: 50,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전·보건교육의 단계별 교육과정 중 근로자가 지켜야 할 규정의 숙지를 위한 교육에 해당하는 것은?",
+          options: [
+            "① 지식교육",
+            "② 태도교육",
+            "③ 문제해결교육",
+            "④ 기능교육"
+          ],
+          answer: 1,
+          explanation: "지식교육은 강의 등을 통해 지식을 전달하는 단계로, 근로자가 지켜야 할 규정의 숙지를 위한 교육이다."
+        }
+      ],
+      [
+        {
+          id: 51,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "시몬즈(Simonds) 방식의 재해손실비 산정에 있어 비보험 코스트에 해당되지 않는 것은?",
+    options: [
+      "① 소송관계 비용",
+      "② 신규작업자에 대한 교육훈련비",
+      "③ 부상자의 직장 복귀 후 생산 감소로 인한 임금비용",
+      "④ 산업재해보상보험법에 의해 보상된 금액"
+    ],
+    answer: 4,
+    explanation: "시몬즈 재해코스트 산정법에서 총재해코스트는 보험코스트와 비보험코스트로 구성된다. 산업재해보상보험법에 의해 보상된 금액은 보험처리된 금액이므로 비보험코스트에 해당하지 않는다."
+  },
+        {
+          id: 52,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "다음 중 교육형태의 분류에 있어 가장 적절하지 않은 것은?",
+    options: [
+      "① 교육의도에 따라 형식적교육, 비형식적교육",
+      "② 교육성격에 따라 일반교육, 교양교육, 특수교육",
+      "③ 교육방법에 따라 가정교육, 학교교육, 사회교육",
+      "④ 교육내용에 따라 실업교육, 직업교육, 고등교육"
+    ],
+    answer: 3,
+    explanation: "교육방법에 따른 분류는 강의법, 토의법, 모의법, 실연법, 프로그램학습법 등이다. 가정교육, 학교교육, 사회교육은 교육방법에 따른 분류로 보기 어렵다."
+  },
+        {
+          id: 53,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "다음 중 산업안전보건법령상 안전관리자의 업무에 해당되지 않은 것은? (단, 그 밖에 안전에 관한 사항으로서 고용노동부장관이 정하는 사항은 제외한다.)",
+    options: [
+      "① 업무수행 내용의 기록·유지",
+      "② 근로자의 건강관리, 보건교육 및 건강증진 지도",
+      "③ 안전분야에 한정된 산업재해에 관한 통계의 유지·관리를 위한 지도·조언",
+      "④ 법 또는 법에 따른 명령으로 정한 안전에 관한 사항의 이행에 관한 보좌 및 조언·지도"
+    ],
+    answer: 2,
+    explanation: "근로자의 건강관리, 보건교육 및 건강증진 지도는 보건관리자의 업무에 해당한다. 안전관리자의 업무에는 산업재해 통계의 유지·관리 분석 보좌, 법령상 안전사항 이행 보좌, 업무수행 내용의 기록·유지 등이 포함된다."
+  },
+        {
+          id: 54,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "다음 중 산업안전보건법령상 안전·보건표지의 종류에 있어 안내표지에 해당하지 않는 것은?",
+    options: [
+      "① 들것",
+      "② 비상용기구",
+      "③ 출입구",
+      "④ 세안장치"
+    ],
+    answer: 3,
+    explanation: "안내표지에는 들것, 비상용기구, 세안장치, 비상구 등이 포함된다. 출입구는 안내표지에 해당하지 않는다."
+  },
+        {
+          id: 55,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "경험한 내용이나 학습된 행동을 다시 생각하여 작업에 적용하지 아니하고 방치함으로써 경험의 내용이나 인상이 약해지거나 소멸되는 현상을 무엇이라 하는가?",
+    options: [
+      "① 착각",
+      "② 훼손",
+      "③ 망각",
+      "④ 단절"
+    ],
+    answer: 3,
+    explanation: "경험한 내용이나 학습된 행동을 다시 떠올리거나 적용하지 않고 방치해 그 내용이나 인상이 약해지거나 사라지는 현상을 망각이라 한다."
+  },
+        {
+          id: 56,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "다음 중 산업재해 통계에 있어서 고려해야 할 사항으로 틀린 것은?",
+    options: [
+      "① 산업재해 통계는 안전 활동을 추진하기 위한 정밀자료이며 중요한 안전 활동 수단이다.",
+      "② 산업재해 통계를 기반으로 안전조직이나 상태를 추측해서는 안 된다.",
+      "③ 산업재해 통계 그 자체보다는 재해 통계에 나타난 경향과 성질의 활동을 중요시해야 한다.",
+      "④ 이용 및 활용가치가 없는 산업재해 통계는 그 작성에 따른 시간과 경비의 낭비임을 인지하여야 한다."
+    ],
+    answer: 1,
+    explanation: "산업재해 통계는 안전 활동을 추진하기 위한 기초 자료이다. 따라서 '정밀자료이며 중요한 안전 활동 수단'이라고 한 ①은 부적절하다."
+  },
+        {
+          id: 57,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "안전관리를 “안전은 ( )을/를 제어하는 기술”이라 정의할 때 다음 중 빈칸에 들어갈 용어로 예방 관리적 차원과 가장 가까운 용어는?",
+    options: [
+      "① 위험",
+      "② 사고",
+      "③ 재해",
+      "④ 상해"
+    ],
+    answer: 1,
+    explanation: "안전관리는 위험을 제어하는 기술로 볼 수 있다. 예방 관리적 관점에서 가장 가까운 용어는 위험이다."
+  },
+        {
+          id: 59,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "다음 중 산업재해가 발생하였을 때 [보기]의 각 단계를 긴급처치의 순서대로 가장 적절하게 나열한 것은?\n[보기] ① 재해자 구출 ② 관계자 통보 ③ 2차재해 방지 ④ 관련 기계의 정지 ⑤ 재해자의 응급처치 ⑥ 현장보존",
+    options: [
+      "① ① → ④ → ② → ⑤ → ③ → ⑥",
+      "② ② → ① → ④ → ⑤ → ③ → ⑥",
+      "③ ④ → ① → ⑤ → ② → ③ → ⑥",
+      "④ ⑤ → ① → ④ → ③ → ② → ⑥"
+    ],
+    answer: 3,
+    explanation: "산업재해 발생 시 긴급처치 순서는 관련 기계의 정지 → 재해자 구출 → 재해자의 응급처치 → 관계자 통보 → 2차재해 방지 → 현장보존의 순서이다."
+  },
+        {
+          id: 60,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "안전교육의 내용에 있어 다음 설명과 가장 관계가 깊은 것은?\n- 교육대상자가 그것을 스스로 행동으로 얻어진다.\n- 개인의 반복적 시행착오에 의해서만 얻어진다.",
+    options: [
+      "① 안전지식의 교육",
+      "② 안전기능의 교육",
+      "③ 문제해결의 교육",
+      "④ 안전태도의 교육"
+    ],
+    answer: 2,
+    explanation: "안전기능의 교육은 같은 것을 반복하여 개인의 시행착오에 의해 점차 형성되는 교육으로, 교육대상자가 스스로 행동을 통해 익히게 된다."
+  },
+        {
+          id: 61,
+    subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+    question: "다음 중 준비, 교시, 연합, 총괄, 응용 시키는 사고과정의 기술교육 진행방법에 해당하는 것은?",
+    options: [
+      "① 듀이의 사고과정",
+      "② 태도 교육 단계이론",
+      "③ 하버드학파의 교수법",
+      "④ MTP(Management Training Program)"
+    ],
+    answer: 3,
+    explanation: "하버드학파의 교수법은 1단계 준비, 2단계 교시, 3단계 연합, 4단계 총괄, 5단계 응용의 순서로 진행된다."
+  }
+      ],
+      [
+        {
+          id: 62,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 방독마스크의 성능기준에 있어 사용 장소에 따른 등급의 설명으로 틀린 것은?",
+          options: [
+            "① 고농도는 가스 또는 증기의 농도가 100분의 2 이하의 대기 중에서 사용하는 것을 말한다.",
+            "② 중농도는 가스 또는 증기의 농도가 100분의 1 이하의 대기 중에서 사용하는 것을 말한다.",
+            "③ 저농도는 가스 또는 증기의 농도가 100분의 0.50 이하의 대기 중에서 사용하는 것으로서 긴급용이 아닌 것을 말한다.",
+            "④ 고농도와 중농도에서 사용하는 방독마스크는 전면형(격리식, 직결식)을 사용해야 한다."
+          ],
+          answer: 3,
+          explanation: "사용장소에 따른 방독마스크의 등급 기준에서 저농도 및 최저농도는 가스 또는 증기의 농도가 100분의 0.1 이하의 대기 중에서 사용하는 것으로서 긴급용이 아닌 것이다. 따라서 ③이 틀린 설명이다."
+        },
+        {
+          id: 63,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 인간의 착각현상에서 움직이지 않는 것이 움직이는 것처럼 느껴지는 현상을 무엇이라 하는가?",
+          options: [
+            "① 유도운동",
+            "② 잔상운동",
+            "③ 자동운동",
+            "④ 유선운동"
+          ],
+          answer: 1,
+          explanation: "인간의 착각현상에서 움직이지 않는 것이 움직이는 것처럼 느껴지는 현상은 유도운동이다."
+        },
+        {
+          id: 64,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "의무안전인증 대상 보호구 중 AE, ABE종 안전모의 질량 증가율은 몇 % 미만이어야 하는가?",
+          options: [
+            "① 1%",
+            "② 2%",
+            "③ 3%",
+            "④ 5%"
+          ],
+          answer: 1,
+          explanation: "AE, ABE종 안전모는 시험성능기준상 질량증가율이 1% 미만이어야 한다."
+        },
+        {
+          id: 65,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 안전점검보고서에 수록될 주요 내용으로 적절하지 않는 것은?",
+          options: [
+            "① 작업현장의 현 배치 상태와 문제점",
+            "② 안전교육 실시현황및 추진방향",
+            "③ 안전관리 스탭의 인적사항",
+            "④ 안전방침과 중점개선 계획"
+          ],
+          answer: 3,
+          explanation: "안전점검보고서의 주요 내용에는 작업현장의 현 배치 상태와 문제점, 안전교육 실시현황 및 추진방향, 안전방침과 중점개선 계획 등이 포함된다. 안전관리 스탭의 인적사항은 주요 수록 내용으로 보기 어렵다."
+        },
+        {
+          id: 66,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "하인리히의 재해발생과 관련한 도미노 이론으로 설명되는 안전관리의 핵심단계에 해당되는 요소는?",
+          options: [
+            "① 외부 환경",
+            "② 개인적 성향",
+            "③ 재해 및 상해",
+            "④ 불안전한 상태 및 행동"
+          ],
+          answer: 4,
+          explanation: "하인리히 사고발생 도미노 이론 5단계는 ① 선천적 결함 ② 개인적 결함 ③ 불안전한 상태 및 행동 ④ 사고 ⑤ 재해이며, 안전관리의 핵심단계는 재해의 직접원인인 3단계 불안전한 상태 및 행동이다."
+        },
+        {
+          id: 67,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "모랄서베이(Morale Survey)의 주요방법 중 태도조사법에 해당하지 않은 것은?",
+          options: [
+            "① 질문지법",
+            "② 면접법",
+            "③ 통계법",
+            "④ 집단토의법"
+          ],
+          answer: 3,
+          explanation: "모랄서베이의 태도조사법에는 질문지법, 면접법, 집단토의법 등이 포함된다. 통계법은 이에 해당하지 않는다."
+        },
+        {
+          id: 68,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 재해를 한번 경험한 사람은 신경과민 등 심리적인 압박을 받게 되어 대처능력이 떨어져 재해가 빈번하게 발생된다는 설(說)은?",
+          options: [
+            "① 기회설",
+            "② 암시설",
+            "③ 경향설",
+            "④ 미숙설"
+          ],
+          answer: 2,
+          explanation: "재해를 한 번 경험한 사람은 신경과민 등 심리적인 압박을 받게 되어 대처능력이 떨어지고 재해가 빈번하게 발생된다는 설은 암시설이다."
+        },
+        {
+          id: 69,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업안전보건법령상 안전보건개선계획서에 개선을 위하여 포함되어야 하는 중점개선 항목에 해당되지 않는 것은?",
+          options: [
+            "① 시설",
+            "② 기계장치",
+            "③ 작업방법",
+            "④ 보호구 착용"
+          ],
+          answer: 4,
+          explanation: "안전보건개선계획서에는 시설, 기계장치, 작업방법, 안전보건관리체제, 안전보건교육, 산업재해 예방 및 작업환경의 개선을 위하여 필요한 사항이 포함되어야 한다. 보호구 착용은 중점개선 항목에 해당되지 않는다."
+        },
+        {
+          id: 70,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 억압당한 욕구가 사회적·문화적으로 가치 있는 목적으로 향하여 노력함으로써 욕구를 충족하는 적응기제(Adjustment Mechanism)를 무엇이라 하는가?",
+          options: [
+            "① 보상",
+            "② 투사",
+            "③ 승화",
+            "④ 합리화"
+          ],
+          answer: 3,
+          explanation: "억압당한 욕구를 사회적·문화적으로 가치 있는 방향으로 전환하여 충족시키는 적응기제는 승화이다."
+        },
+        {
+          id: 71,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "재해원인 분석시 고려해야 할 4M에 해당하지 않는 것은?",
+          options: [
+            "① Man",
+            "② Mechanism",
+            "③ Media",
+            "④ Management"
+          ],
+          answer: 2,
+          explanation: "재해원인 분석의 4M은 Man, Machine, Media, Management이다. Mechanism은 해당하지 않는다."
+        }
+      ],
+      [
+        {
+          id: 72,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업안전보건법령에 따라 자율검사프로그램을 인정받기 위한 충족요건으로 틀린 것은?",
+          options: [
+            "① 관련 법에 따른 검사원을 고용하고 있을 것",
+            "② 관련 법에 따른 검사 주기마다 검사를 할 것",
+            "③ 자율검사프로그램의 검사기준이 안전검사 기준에 충족할 것",
+            "④ 검사를 할 수 있는 장비를 갖추고 이를 유지·관리할 수 있을 것"
+          ],
+          answer: 2,
+          explanation: "자율검사프로그램 인정 요건에는 검사원 고용, 검사 장비의 확보 및 유지·관리, 자율검사프로그램의 검사기준이 안전검사기준을 충족할 것 등이 포함된다. 검사 주기는 안전검사 주기의 1/2에 해당하는 주기로 실시해야 하므로 ②는 틀린 설명이다."
+        },
+        {
+          id: 73,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "연평균 500명의 근로자가 근무하는 사업장에서 지난 한해 동안 20명의 재해자가 발생하였다. 만약 이 사업장에서 한 근로자가 평생 동안 작업을 한다면 약 몇 건의 재해를 당할 수 있겠는가? (단, 1인당 평생근로시간은 120000시간으로 한다.)",
+          options: [
+            "① 1건",
+            "② 2건",
+            "③ 4건",
+            "④ 6건"
+          ],
+          answer: 2,
+          explanation: "도수율은 20 / (500 × 8 × 300) × 10^6 = 16.67이고, 평생근로시간이 12만 시간이므로 환산도수율은 16.67 × 0.12 = 약 2건이다."
+        },
+        {
+          id: 74,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "토의식 교육방법 중 패널멤버(교육과제에 정통한 전문가 4~5명 정도)가 피교육장 앞에서 자유로이 토의하고 뒤에 피교육자 전원이 참가하여 사회자의 사회에 따라 토의하는 방법은?",
+          options: [
+            "① 포럼(Forum)",
+            "② 심포지엄(Symposium)",
+            "③ 패널 디스커션(Panel Discussion)",
+            "④ 버즈세션(Buzz Session)"
+          ],
+          answer: 3,
+          explanation: "패널 디스커션은 교육과제에 정통한 전문가들이 앞에서 자유롭게 토의한 뒤, 청중이 함께 참여하여 사회자의 진행에 따라 토의하는 방법이다."
+        },
+        {
+          id: 75,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "토의식 교육방법 중 먼저 사례를 제시하고 문제적 사실들과 그의 상호관계에 대하여 검토하고 대책을 내놓게 하는 토의 방법은?",
+          options: [
+            "① 포럼(Forum)",
+            "② 케이스 메소드(Case Method)",
+            "③ 패널 디스커션(Panel Discussion)",
+            "④ 버즈세션(Buzz Session)"
+          ],
+          answer: 2,
+          explanation: "케이스 메소드는 먼저 사례를 제시하고 그 사례의 문제 사실과 상호관계를 검토하여 대책을 찾게 하는 토의식 교육방법이다."
+        },
+        {
+          id: 76,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "교육의 형태에 있어 존 듀이(Dewey)가 주장하는 대표적인 형식적 교육에 해당하는 것은?",
+          options: [
+            "① 가정안전교육",
+            "② 사회안전교육",
+            "③ 학교안전교육",
+            "④ 부모안전교육"
+          ],
+          answer: 3,
+          explanation: "존 듀이가 말한 대표적인 형식적 교육은 학교교육이며, 보기 중에서는 학교안전교육이 이에 해당한다."
+        },
+        {
+          id: 77,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "집단의 기능에 관한 설명으로 틀린 것은?",
+          options: [
+            "① 집단의 규범은 변화하기 어려운 것으로 불변적이다.",
+            "② 집단 내에 머물도록 하는 내부의 힘을 응집력이라 한다.",
+            "③ 규범은 집단을 유지하고 집단의 목표를 달성하기 위해 만들어진 것이다.",
+            "④ 집단이 하나의 집으로서의 역할을 수행하기 위해서는 집단 목표가 있어야 한다."
+          ],
+          answer: 1,
+          explanation: "집단의 규범은 고정불변한 것이 아니라 집단의 발전과 상황에 따라 변화할 수 있다. 따라서 ①이 틀린 설명이다."
+        },
+        {
+          id: 78,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "스탭형 안전조직에 있어서 스탭의 주된 역할이 아닌 것은?",
+          options: [
+            "① 실시계획의 추진",
+            "② 안전관리 계획안의 작성",
+            "③ 정보수집과 주지, 활용",
+            "④ 기업의 제도적 기본방침 시달"
+          ],
+          answer: 4,
+          explanation: "스탭형 안전조직의 스탭은 안전관리 계획안 작성, 정보 수집 및 활용, 조사·검토 등의 역할을 담당한다. 기업의 제도적 기본방침 시달은 스탭의 주된 역할로 보기 어렵다."
+        },
+        {
+          id: 79,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "인간관계 관리기법에 있어 구성원 상호간의 선호도를 기초로 집단 내부의 동태적 상호관계를 분석하는 방법으로 가장 적절한 것은?",
+          options: [
+            "① 소시오메트리(sociometry)",
+            "② 그리드 훈련(grid training)",
+            "③ 집단역학(group dynamic)",
+            "④ 감수성 훈련(sensitivity training)"
+          ],
+          answer: 1,
+          explanation: "구성원 상호간의 선호도를 바탕으로 집단 내부의 동태적 상호관계를 분석하는 방법은 소시오메트리이다."
+        },
+        {
+          id: 80,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 하인리히가 제시한 1:29:300의 재해구성비율에 관한 설명으로 틀린 것은?",
+          options: [
+            "① 총 사고발생건수는 300건이다.",
+            "② 중상 또는 사망은 1회 발생된다.",
+            "③ 고장이 포함되는 무상해사고는 300건 발생된다.",
+            "④ 인적, 물적 손실이 수반되는 경상이 29건 발생된다."
+          ],
+          answer: 1,
+          explanation: "하인리히의 재해구성비율은 중상 또는 사망 1건, 경상 29건, 무상해사고 300건으로 총 사고발생건수는 330건이다. 따라서 ①이 틀린 설명이다."
+        },
+        {
+          id: 81,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "바람직한 안전교육을 진행시키기 위한 4단계 가운데 피교육자로 하여금 작업습관의 확립과 토론을 통한 공감을 가지도록 하는 단계는?",
+          options: [
+            "① 도입",
+            "② 제시",
+            "③ 적용",
+            "④ 확인"
+          ],
+          answer: 3,
+          explanation: "안전교육 방법의 4단계는 도입-제시-적용-확인이다. 이 중 적용 단계에서 피교육자가 작업습관을 확립하고 토론을 통해 공감을 갖도록 한다."
+        }
+      ],
+      [
+        {
+          id: 82,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "제조물책임법에 명시된 결함의 종류에 해당되지 않는 것은?",
+          options: [
+            "① 제조상의 결함",
+            "② 표시상의 결함",
+            "③ 사용상의 결함",
+            "④ 설계상의 결함"
+          ],
+          answer: 3,
+          explanation: "제조물책임법상 결함의 종류에는 제조상의 결함, 설계상의 결함, 표시상의 결함이 있다. 사용상의 결함은 이에 해당하지 않는다."
+        },
+        {
+          id: 83,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "방진마스크의 선정기준으로 적합하지 않은 것은?",
+          options: [
+            "① 배기저항이 낮을 것",
+            "② 흡기저항이 낮을 것",
+            "③ 사용적이 클 것",
+            "④ 시야가 넓을 것"
+          ],
+          answer: 3,
+          explanation: "방진마스크 선정기준에는 흡기·배기저항이 낮을 것, 시야가 넓을 것, 여과효율이 좋을 것, 안면밀착성이 좋을 것 등이 있다. 사용적이 클 것은 적합하지 않다."
+        },
+        {
+          id: 84,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 산업안전보건법상 “화학물질 취급장소에서의 유해·위험 경고”에 사용되는 안전·보건표지의 색도 기준으로 옳은 것은?",
+          options: [
+            "① 7.5R 4/14",
+            "② 5Y 8.5/12",
+            "③ 2.5PB 4/10",
+            "④ 2.5G 4/10"
+          ],
+          answer: 1,
+          explanation: "화학물질 취급장소에서의 유해·위험 경고에는 빨간색이 사용되며, 색도 기준은 7.5R 4/14이다."
+        },
+        {
+          id: 85,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전에 관한 기본 방침을 명확하게 해야 할 임무는 누구에게 있는가?",
+          options: [
+            "① 안전관리자",
+            "② 관리감독자",
+            "③ 근로자",
+            "④ 사업주"
+          ],
+          answer: 4,
+          explanation: "사업주는 안전에 관한 기본 방침을 명확하게 해야 할 임무가 있다."
+        },
+        {
+          id: 86,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업안전보건법상 중대재해에 해당하지 않는 것은?",
+          options: [
+            "① 사망자가 2명 발생한 재해",
+            "② 6개월 요양을 요하는 부상자가 동시에 4명 발생한 재해",
+            "③ 부상자 또는 직업성 질병자가 동시에 12명 발생한 재해",
+            "④ 3개월 요양을 요하는 부상자가 1명, 2개월 요양을 요하는 부상자가 4명 발생한 재해"
+          ],
+          answer: 4,
+          explanation: "중대재해는 사망자가 1명 이상 발생한 재해, 3개월 이상의 요양이 필요한 부상자가 동시에 2명 이상 발생한 재해, 부상자 또는 직업성 질병자가 동시에 10명 이상 발생한 재해를 말한다. ④는 이에 해당하지 않는다."
+        },
+        {
+          id: 87,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "고무제 안전화의 구비조건이 아닌 것은?",
+          options: [
+            "① 유해한 흠, 균열, 기포, 이물질 등이 없어야 한다.",
+            "② 바닥, 발등, 발 뒤꿈치 등의 접착부분에 물이 들어오지 않아야 한다.",
+            "③ 에나멜 도포는 벗겨져야 하며, 건조가 완전하여야 한다.",
+            "④ 완성품의 성능은 압박감, 충격 등의 성능시험에 합격하여야 한다."
+          ],
+          answer: 3,
+          explanation: "고무제 안전화는 에나멜이 벗겨지지 않아야 하고 건조가 충분해야 하며, 에나멜을 칠한 면에 꼬임이 생기지 않아야 한다. 따라서 ③은 틀린 설명이다."
+        },
+        {
+          id: 88,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "시몬즈(Simonds)의 재해코스트 산출방식에서 A, B, C, D는 무엇을 뜻하는가?",
+          options: [
+            "① 직접손실비",
+            "② 간접손실비",
+            "③ 보험 코스트",
+            "④ 비보험 코스트 평균치"
+          ],
+          answer: 4,
+          explanation: "시몬즈의 재해코스트 산정법에서 비보험코스트는 A, B, C, D의 평균치를 이용하여 산출한다. 따라서 A, B, C, D는 비보험 코스트 평균치를 의미한다."
+        },
+        {
+          id: 89,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전교육 훈련에 있어 동기부여 방법에 대한 설명으로 가장 거리가 먼 것은?",
+          options: [
+            "① 안전 목표를 명확히 설정한다.",
+            "② 결과를 알려준다.",
+            "③ 경쟁과 협동을 유발시킨다.",
+            "④ 동기유발 수준을 정도 이상으로 높인다."
+          ],
+          answer: 4,
+          explanation: "동기부여는 적정 수준을 유지하는 것이 중요하다. 동기유발 수준을 지나치게 높이는 것은 바람직하지 않으므로 가장 거리가 멀다."
+        },
+        {
+          id: 90,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업재해의 원인 중 기술적 원인에 해당하는 것은?",
+          options: [
+            "① 작업준비의 불충분",
+            "② 안전장치의 기능 제거",
+            "③ 안전교육의 부족",
+            "④ 구조재료의 부적당"
+          ],
+          answer: 4,
+          explanation: "산업재해 원인 중 기술적 원인에는 구조재료의 부적당 등이 포함된다. 작업준비의 불충분은 관리적 원인, 안전교육의 부족은 교육적 원인, 안전장치의 기능 제거는 인적 원인 중 불안전한 행동에 해당한다."
+        }
+      ],
+      [
+        {
+          id: 91,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전보건교육의 교육지도 원칙에 해당되지 않은 것은?",
+          options: [
+            "① 피교육자 중심의 교육을 실시한다.",
+            "② 동기부여를 한다.",
+            "③ 5관을 활용한다.",
+            "④ 어려운 것부터 쉬운 것으로 시작한다."
+          ],
+          answer: 4,
+          explanation: "안전보건교육은 피교육자 중심으로 실시하고, 동기부여를 하며, 오감을 활용하는 것이 원칙이다. 교육은 쉬운 것부터 어려운 것으로 진행하는 것이 바람직하다."
+        },
+        {
+          id: 92,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "근로손실일수 산출에 있어서 사망으로 인한 근로손실연수는 보통 몇 년을 기준으로 산정하는가?",
+          options: [
+            "① 30",
+            "② 25",
+            "③ 15",
+            "④ 10"
+          ],
+          answer: 2,
+          explanation: "사망으로 인한 근로손실일수는 연간 300일 근무 기준으로 25년을 산정하여 300 × 25 = 7500일로 계산한다."
+        },
+        {
+          id: 93,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 산업안전보건법상 안전검사 대상 유해·위험 기계의 종류가 아닌 것은?",
+          options: [
+            "① 곤돌라",
+            "② 압력용기",
+            "③ 리프트",
+            "④ 아크용접기"
+          ],
+          answer: 4,
+          explanation: "안전검사 대상 유해·위험 기계에는 프레스, 전단기, 크레인, 리프트, 압력용기, 곤돌라 등이 포함된다. 아크용접기는 이에 해당하지 않는다."
+        },
+        {
+          id: 94,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "경보기가 울려도 기차가 오기까지 아직 시간이 있다고 판단하여 건널목을 건너다가 사고를 당했다. 다음 중 이 재해자의 행동성향으로 옳은 것은?",
+          options: [
+            "① 착오·착각",
+            "② 무의식행동",
+            "③ 억측판단",
+            "④ 지름길반응"
+          ],
+          answer: 3,
+          explanation: "억측판단은 자기 멋대로 주관적인 판단이나 희망적인 관찰에 근거하여, 충분히 확인하지 않고 행동으로 옮기는 판단을 말한다."
+        },
+        {
+          id: 95,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전교육 방법 중 강의식 교육을 1시간 하려고 할 경우 가장 많이 소비되는 단계는?",
+          options: [
+            "① 도입",
+            "② 제시",
+            "③ 적용",
+            "④ 확인"
+          ],
+          answer: 2,
+          explanation: "안전교육 방법 4단계는 도입 → 제시 → 적용 → 확인이다. 강의식 교육에서는 제시 단계에서 내용을 하나씩 나누어 설명하므로 가장 많은 시간이 소요된다."
+        },
+        {
+          id: 96,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업안전보건법상 안전보건개선계획의 수립·시행명령을 받은 사업주는 고용노동부장관이 정하는 바에 따라 안전보건개선계획서를 작성하여 그 명령을 받은 날부터 며칠 이내에 관할 지방고용노동관서의 장에게 제출해야 하는가?",
+          options: [
+            "① 15일",
+            "② 30일",
+            "③ 45일",
+            "④ 60일"
+          ],
+          answer: 4,
+          explanation: "안전보건개선계획서 제출 대상 사업주는 안전보건개선계획 수립·시행명령을 받은 날부터 60일 이내에 관할 지방고용노동관서의 장에게 해당 계획서를 제출해야 한다."
+        },
+        {
+          id: 97,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "산업재해의 발생형태 중 사람이 평면상으로 넘어졌을 때의 사고 유형은 무엇이라 하는가?",
+          options: [
+            "① 맞음",
+            "② 넘어짐",
+            "③ 무너짐",
+            "④ 떨어짐"
+          ],
+          answer: 2,
+          explanation: "넘어짐은 사람이 거의 평면 또는 경사면, 층계 등에서 구르거나 넘어지는 경우를 말한다."
+        },
+        {
+          id: 98,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 방진마스크의 구비 조건으로 적절하지 않은 것은?",
+          options: [
+            "① 흡기밸브는 미약한 호흡에 대하여 확실하고 예민하게 작동하도록 할 것",
+            "② 쉽게 착용되어야 하고 착용하였을 때 안면부가 안면에 밀착되어 공기가 새지 않을 것",
+            "③ 여과재는 여과성능이 우수하고 인체에 장해를 주지 않을 것",
+            "④ 흡·배기밸브는 외부의 힘에 의하여 손상되지 않도록 흡·배기 저항이 높을 것"
+          ],
+          answer: 4,
+          explanation: "방진마스크는 흡기저항과 배기저항이 낮아야 한다. 따라서 흡·배기 저항이 높아야 한다는 설명은 적절하지 않다."
+        },
+        {
+          id: 99,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "버드(Bird)의 재해발생에 관한 연쇄이론 중 직접적인 원인은 몇 단계에 해당되는가?",
+          options: [
+            "① 1단계",
+            "② 2단계",
+            "③ 3단계",
+            "④ 4단계"
+          ],
+          answer: 3,
+          explanation: "버드의 신 도미노 이론은 1단계 관리의 부족, 2단계 기본원인, 3단계 직접원인 또는 징후, 4단계 사고, 5단계 재해 또는 상해이다. 직접적인 원인은 3단계이다."
+        },
+        {
+          id: 100,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전교육의 3요소에 해당되지 않는 것은?",
+          options: [
+            "① 강사",
+            "② 교육방법",
+            "③ 수강자",
+            "④ 교재"
+          ],
+          answer: 2,
+          explanation: "안전교육의 3요소는 강사, 수강자, 교재이다. 교육방법은 안전교육의 3요소에 해당하지 않는다."
+        }
+      ],
+      [
+        {
+          id: 101,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "ABE종 안전모에 대하여 내수성 시험을 할 때 물에 담그기 전의 질량이 400g이고, 물에 담근 후의 질량이 410g이었다면 질량증가율과 합격여부로 옳은 것은?",
+          options: [
+            "① 질량증가율 : 2.5%, 합격여부 : 불합격",
+            "② 질량증가율 : 2.5%, 합격여부 : 합격",
+            "③ 질량증가율 : 102.5%, 합격여부 : 불합격",
+            "④ 질량증가율 : 102.5%, 합격여부 : 합격"
+          ],
+          answer: 1,
+          explanation: "질량증가율 = (담근 후 질량 - 담그기 전 질량) / 담그기 전 질량 × 100 = (410 - 400) / 400 × 100 = 2.5%이다. AE, ABE종 안전모의 질량증가율은 1% 미만이어야 하므로 불합격이다."
+        },
+        {
+          id: 102,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "시몬즈(Simonds)의 재해 손실비용 산정 방식에 있어 비보험 코스트에 포함되지 않는 것은?",
+          options: [
+            "① 영구 전노동불능 상해",
+            "② 영구 부분노동불능 상해",
+            "③ 일시 전노동불능 상해",
+            "④ 일시 부분노동불능 상해"
+          ],
+          answer: 1,
+          explanation: "시몬즈 방식에서 사망과 영구 전노동불능은 보험코스트에 해당하고, 그 외의 상해는 비보험코스트에 해당한다. 따라서 영구 전노동불능 상해는 비보험코스트에 포함되지 않는다."
+        },
+        {
+          id: 103,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "아담스(Edward Adams)의 사고연쇄 반응이론 중 관리자의 의사결정을 잘못하거나 감독자가 관리적 잘못을 하였을 때의 단계에 해당되는 것은?",
+          options: [
+            "① 사고",
+            "② 작전적 에러",
+            "③ 관리구조",
+            "④ 전술적 에러"
+          ],
+          answer: 2,
+          explanation: "아담스 사고연쇄 반응이론은 1단계 관리구조, 2단계 작전적 에러, 3단계 전술적 에러, 4단계 사고, 5단계 상해로 구분된다. 관리자의 의사결정 오류나 감독자의 관리적 잘못은 2단계인 작전적 에러에 해당한다."
+        },
+        {
+          id: 104,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 정기점검에 관한 설명으로 가장 적합한 것은?",
+          options: [
+            "① 안전강조 기간, 방화점검 기간에 실시하는 점검",
+            "② 사고 발생 이후 곧바로 외부 전문가에 의하여 실시하는 점검",
+            "③ 작업자에 의해 매일 작업 전, 중, 후에 해당 작업설비에 대하여 수시로 실시하는 점검",
+            "④ 기계, 기구, 시설 등에 대하여 주, 월, 또는 분기 등 지정된 날짜에 실시하는 점검"
+          ],
+          answer: 4,
+          explanation: "정기점검은 기계, 기구, 시설 등에 대하여 주, 월, 분기 등 지정된 날짜에 정기적으로 실시하는 점검이다."
+        },
+        {
+          id: 105,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "하인리히 사고예방대책의 기본원리 5단계로 옳은 것은?",
+          options: [
+            "① 조직 → 사실의 발견 → 분석 → 시정방법의 선정 → 시정책의 적용",
+            "② 조직 → 분석 → 사실의 발견 → 시정방법의 선정 → 시정책의 적용",
+            "③ 사실의 발견 → 조직 → 분석 → 시정방법의 선정 → 시정책의 적용",
+            "④ 사실의 발견 → 분석 → 조직 → 시정방법의 선정 → 시정책의 적용"
+          ],
+          answer: 1,
+          explanation: "하인리히의 재해예방 대책 5단계는 1단계 안전관리 조직, 2단계 사실의 발견, 3단계 평가 및 분석, 4단계 시정책의 선정, 5단계 시정책의 적용이다."
+        },
+        {
+          id: 106,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전점검표(check list)에 포함되어야 할 사항이 아닌 것은?",
+          options: [
+            "① 점검대상",
+            "② 판정기준",
+            "③ 점검방법",
+            "④ 조치결과"
+          ],
+          answer: 4,
+          explanation: "안전점검표에는 판정기준, 점검대상, 점검방법, 점검부분, 점검항목, 실시주기, 조치 등이 포함된다. 조치결과는 안전점검표의 필수 포함사항으로 보기 어렵다."
+        },
+        {
+          id: 107,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "A사업장의 강도율이 2.5이고, 연간 재해발생 건수가 12건, 연간 총 근로 시간수가 120만 시간일 때 이 사업장의 종합재해지수는 약 얼마인가?",
+          options: [
+            "① 1.6",
+            "② 5.0",
+            "③ 27.6",
+            "④ 230"
+          ],
+          answer: 2,
+          explanation: "도수율 = 재해건수 / 연근로시간수 × 10^6 = 12 / 1,200,000 × 10^6 = 10이다. 종합재해지수 = √(도수율 × 강도율) = √(10 × 2.5) = √25 = 5.0이다."
+        },
+        {
+          id: 108,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 점검시기에 따른 안전점검의 종류로 볼 수 없는 것은?",
+          options: [
+            "① 수시점검",
+            "② 개인점검",
+            "③ 정기점검",
+            "④ 일상점검"
+          ],
+          answer: 2,
+          explanation: "점검시기에 따른 안전점검의 종류에는 정기점검, 수시점검, 임시점검, 특별점검, 일상점검, 정밀점검 등이 있다. 개인점검은 이에 해당하지 않는다."
+        },
+        {
+          id: 109,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "재해발생시 조치순서 중 재해조사 단계에서 실시하는 내용으로 옳은 것은?",
+          options: [
+            "① 현장보존",
+            "② 관계자에게 통보",
+            "③ 잠재재해 위험요인의 색출",
+            "④ 피해자의 응급조치"
+          ],
+          answer: 3,
+          explanation: "재해조사 단계에서는 잠재재해 위험요인을 색출한다. 현장보존, 관계자 통보, 피해자 응급조치는 재해 발생 직후의 긴급조치에 해당한다."
+        },
+        {
+          id: 110,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "위치, 순서, 패턴, 형상, 기억오류 등 외부적 요인에 의해 나타나는 것은?",
+          options: [
+            "① 메트로놈",
+            "② 리스크테이킹",
+            "③ 부주의",
+            "④ 착오"
+          ],
+          answer: 4,
+          explanation: "착오(Mistake)는 상황해석을 잘못하거나 목표를 잘못 설정하여 발생하는 오류로, 위치·순서·패턴·형상·기억오류 등 외부적 요인에 의해 나타난다."
+        }
+      ],
+      [
+        {
+          id: 111,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 사람들 중 재해코스트에 대한 이론(역설)과 관계가 없는 사람은?",
+          options: [
+            "① 시몬즈",
+            "② 버즈",
+            "③ 웨버",
+            "④ 콤페스"
+          ],
+          answer: 3,
+          explanation: "시몬즈는 재해손실비용 이론을 제안하였고, 버즈는 재해와 코스트 분석과 관계가 있다. 웨버는 감각의 식별과 관련된 웨버 법칙으로 알려져 있어 재해코스트 이론과 관계가 없다."
+        },
+        {
+          id: 112,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 착오 요인과 관계가 먼 것은?",
+          options: [
+            "① 동기부여의 부족",
+            "② 정보 부족",
+            "③ 정서적 불안정",
+            "④ 자기합리화"
+          ],
+          answer: 1,
+          explanation: "착오요인에는 판단과정의 착오요인과 인지과정의 착오요인이 있다. 정보 부족, 정서적 불안정, 자기합리화는 착오요인과 관련이 있으나 동기부여의 부족은 관계가 멀다."
+        },
+        {
+          id: 113,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "연평균 근로자 1000명인 사업장에서 연간 3건의 재해가 발생하였다. 사망 1명, 50일 요양 1명, 30일요양 2명이 발생했을 경우에 강도율은 얼마인가? (단, 연근로시간은 2500시간으로 한다.)",
+          options: [
+            "① 2.04",
+            "② 3.04",
+            "③ 4.04",
+            "④ 5.04"
+          ],
+          answer: 2,
+          explanation: "강도율 = 총요양근로손실일수 / 연근로시간수 × 10³ 이다. 사망 1명은 7500일, 요양근로손실일수는 (50 + 30 × 2) × 300 / 365 이므로 강도율은 약 3.04이다."
+        },
+        {
+          id: 114,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 불안전한 행동에 해당되지 않는 것은?",
+          options: [
+            "① 안전장치를 해지한다.",
+            "② 작업장소와 공간이 부족하다.",
+            "③ 보호구를 착용하지 않고 작업한다.",
+            "④ 적재·청소 등 정리정돈을 하지 않는다."
+          ],
+          answer: 2,
+          explanation: "안전장치 해지, 보호구 미착용, 정리정돈 미실시는 불안전한 행동에 해당한다. 작업장소와 공간 부족은 불안전한 상태, 즉 물적 요인에 해당한다."
+        },
+        {
+          id: 115,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "다음 중 사업내 안전보건교육의 대상자에 대한 설명으로 틀린 것은?",
+          options: [
+            "① 신규 채용자 중 계절 작업자는 교육 대상에서 제외 한다.",
+            "② 작업내용 변경자는 필히 교육 대상이 된다.",
+            "③ 신규 채용자 중 감시작업자는 교육 대상이다.",
+            "④ 위험작업 종사자는 교육대상이다."
+          ],
+          answer: 1,
+          explanation: "신규 채용자는 계절 작업 여부와 관계없이 안전보건교육 대상이다. 따라서 신규 채용자 중 계절 작업자는 교육 대상에서 제외된다는 설명은 틀리다."
+        },
+        {
+          id: 116,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "부주의의 발생원인이 소질적 조건일 때 그 대책으로 알맞은 것은?",
+          options: [
+            "① 카운슬링",
+            "② 교육 및 훈련",
+            "③ 작업순서 정비",
+            "④ 적성에 따른 배치"
+          ],
+          answer: 4,
+          explanation: "부주의의 내적 원인 중 소질적 문제에 대한 대책은 적성에 따른 배치이다. 의식의 우회는 상담, 경험·미경험은 교육 및 훈련이 대책이다."
+        },
+        {
+          id: 117,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "안전교육방법 중 인간의 5관을 활용하는 방법에서 그 효과치가 가장 낮은 것은?",
+          options: [
+            "① 시각",
+            "② 청각",
+            "③ 촉각",
+            "④ 미각"
+          ],
+          answer: 4,
+          explanation: "안전교육방법 중 인간의 5관을 활용하는 방법에서 효과적인 순서는 시각 → 청각 → 촉각 → 미각 → 후각 순이다. 보기 중 효과치가 가장 낮은 것은 미각이다."
+        },
+        {
+          id: 118,
+          subject: "제1과목 : 산업재해 예방 및 안전보건교육",
+          question: "보호구 안전인증 고시에서 정하는 전면형 방진마스크의 항목별 성능기준에서 유효시야는 몇 % 이상이어야 하는가?",
+          options: [
+            "① 60",
+            "② 65",
+            "③ 70",
+            "④ 75"
+          ],
+          answer: 3,
+          explanation: "전면형 방진마스크의 유효시야는 70% 이상이어야 한다."
+        }
+      ],
+      [
+        {
+          id: 201,
+          displayNo: 1,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "인간과 기계의 기본 기능은 감지, 정보저장, 정보처리 및 의사결정, 행동 등 4가지로 구분할 수 있다. 다음 중 행동기능에 속하는 것은?",
+          options: [
+            "① 음파탐지기",
+            "② 추론",
+            "③ 결심",
+            "④ 음성"
+          ],
+          answer: 4,
+          explanation: "인간과 기계의 기본 기능 중 감지는 입력 기능이고, 정보처리 및 의사결정에는 추론과 결심 등이 포함된다. 음성은 외부로 나타나는 행동기능에 해당한다."
+        },
+        {
+          id: 202,
+          displayNo: 2,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "전기적 생리신호 측정 가운데 근육의 활동도를 측정하는 방법은?",
+          options: [
+            "① ECG",
+            "② EMG",
+            "③ EEG",
+            "④ GSR"
+          ],
+          answer: 2,
+          explanation: "근전도(EMG)는 근육의 활동도를 측정하는 방법이다. ECG는 심전도, EEG는 뇌전도, GSR은 피부전기반응이다."
+        },
+        {
+          id: 203,
+          displayNo: 3,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "회전운동을 하는 조종구와 같은 조종장치의 반경이 10cm이고 30°만큼 움직였을 때, 선형표시장치의 눈금이 4.84cm 움직였다. 이때의 통제표시비는?",
+          options: [
+            "① 1.256",
+            "② 1.08",
+            "③ 0.965",
+            "④ 0.833"
+          ],
+          answer: 2,
+          explanation: "통제표시비 = 조종장치 이동거리 / 표시장치 이동거리이다. 조종장치 이동거리는 (30/360) × 2π × 10 = 약 5.24cm이고, 5.24 / 4.84 = 약 1.08이다."
+        },
+        {
+          id: 204,
+          displayNo: 4,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "산업재해 발생의 배경에 대한 설명 중 잘못된 것은?",
+          options: [
+            "① 작업환경과 개인의 잘못간의 연쇄성",
+            "② 재해관련 직·간접비용 발생의 법칙성",
+            "③ 물적원인과 인적원인 발생 상호간의 단속성",
+            "④ 준 사고(near miss)와 중대사고 발생 비율간의 법칙성"
+          ],
+          answer: 3,
+          explanation: "산업재해의 물적원인과 인적원인은 서로 단절된 관계가 아니라 상호 연관성이 매우 높다. 따라서 단속성이라고 한 ③이 잘못된 설명이다."
+        },
+        {
+          id: 205,
+          displayNo: 5,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "작업공간 포락면(Work Space Envelope)이란 사람이 작업하는데 사용하는 공간을 말하는데 다음의 어떤 경우인가?",
+          options: [
+            "① 한 장소에 엎드려서 수행하는 작업활동",
+            "② 한 장소에 누워서 수행하는 작업활동",
+            "③ 한 장소에 앉아서 수행하는 작업활동",
+            "④ 한 장소에 서서 수행하는 작업활동"
+          ],
+          answer: 3,
+          explanation: "작업공간 포락면은 한 장소에 앉아서 수행하는 작업에서 작업자가 사용하는 3차원 공간을 말한다."
+        },
+        {
+          id: 206,
+          displayNo: 6,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "디시전 트리(Decision Tree)를 재해사고의 분석에 이용한 경우의 분석법이며, 설비의 설계단계에서부터 사용단계까지의 각 단계에서 위험을 분석하는 귀납적, 정량적 분석방법은?",
+          options: [
+            "① ETA",
+            "② FMEA",
+            "③ THERP",
+            "④ CA"
+          ],
+          answer: 1,
+          explanation: "ETA는 사건수분석법 또는 사상수분석법으로, 디시전 트리와 같은 사상의 안전도를 이용하여 시스템의 안전도를 나타내는 귀납적·정량적 분석방법이다."
+        },
+        {
+          id: 207,
+          displayNo: 7,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "인간 전달함수(Human Transfer Function)의 결점이 아닌 것은?",
+          options: [
+            "① 입력의 협소성",
+            "② 불충분한 직무분석",
+            "③ 시각점 제약성",
+            "④ 정신운동의 묘사성"
+          ],
+          answer: 4,
+          explanation: "인간 전달함수의 결점에는 입력의 협소성, 불충분한 직무분석, 시각점 제약성 등이 있다. 정신운동의 묘사성은 결점에 해당하지 않는다."
+        },
+        {
+          id: 208,
+          displayNo: 8,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "신체의 안정성을 증대시키는 조건이 아닌 것은?",
+          options: [
+            "① 모멘트의 균형을 고려한다.",
+            "② 몸의 무게중심을 낮춘다.",
+            "③ 몸의 무게중심을 기저 내에 들게 한다.",
+            "④ 기저를 작게 한다."
+          ],
+          answer: 4,
+          explanation: "신체의 안정성을 높이려면 기저면을 크게 하고, 무게중심을 낮추며, 무게중심이 기저 내에 있도록 해야 한다. 기저를 작게 하는 것은 안정성을 낮춘다."
+        },
+        {
+          id: 209,
+          displayNo: 9,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "다음 표시장치 중 동적 표시장치는?",
+          options: [
+            "① 도로표지판",
+            "② 도표",
+            "③ 지도",
+            "④ 고도계"
+          ],
+          answer: 4,
+          explanation: "동적 표시장치는 고도계, 온도계처럼 어떤 변수의 상태나 상황이 변화하는 것을 나타내는 표시장치이다. 도로표지판, 도표, 지도는 정적 표시장치이다."
+        },
+        {
+          id: 210,
+          displayNo: 10,
+          subject: "제2과목 : 위험성 평가관리",
+          question: "근골격계 질환의 유해요인의 조사방법 중 인간공학적 평가 기법이 아닌 것은?",
+          options: [
+            "① OWAS",
+            "② NASA-TLX",
+            "③ NLE",
+            "④ RULA"
+          ],
+          answer: 2,
+          explanation: "OWAS, NLE, RULA는 인간공학적 근골격계 평가 기법이다. NASA-TLX는 작업자의 주관적 작업부하를 측정하는 도구로 근골격계 인간공학적 평가 기법이 아니다."
+        }
+      ]
     ];
 
-    // 문제를 화면에 생성하는 함수
-    function renderQuiz() {
-        const quizForm = document.getElementById('quiz-form');
-        let html = '';
+    let currentPageIndex = 0;
+    let currentQuestionIndex = 0;
+    let timerId = null;
 
-        quizData.forEach((q) => {
-            html += `
-                <div class="quiz-section" id="section-${q.id}">
-                    <div class="question">${q.question}</div>
-                    <ul class="options">
-            `;
-            
-            q.options.forEach((option, i) => {
-                html += `
-                    <li>
-                        <label>
-                            <input type="radio" name="question-${q.id}" value="${i + 1}">
-                            ${option}
-                        </label>
-                    </li>
-                `;
-            });
+    const pageStates = quizPages.map(page => ({
+      answers: Array(page.length).fill(null),
+      marked: Array(page.length).fill(false),
+      submitted: false,
+      reviewMode: false,
+      startedAt: Date.now()
+    }));
 
-            html += `
-                    </ul>
-                    <div class="result-box" id="result-${q.id}"></div>
-                </div>
-            `;
-        });
-
-        quizForm.innerHTML = html;
+    function getCurrentPage() {
+      return quizPages[currentPageIndex].slice(0, QUESTIONS_PER_PAGE);
     }
 
-    // 채점하기 함수
-    function gradeQuiz() {
-        let score = 0;
-        let allAnswered = true;
-
-        // 먼저 다 풀었는지 검사
-        for (let q of quizData) {
-            const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
-            if (!selected) {
-                allAnswered = false;
-                break;
-            }
-        }
-
-        if (!allAnswered) {
-            alert("아직 풀지 않은 문제가 있습니다! 모든 문제를 풀고 제출해 주세요.");
-            return;
-        }
-
-        // 실제 채점 및 해설 공개
-        quizData.forEach(q => {
-            const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
-            const userAnswer = parseInt(selected.value);
-            const resultBox = document.getElementById(`result-${q.id}`);
-            
-            if (userAnswer === q.answer) {
-                score++;
-                resultBox.className = "result-box correct";
-                resultBox.innerHTML = `<strong>⭕ 정답입니다!</strong>`;
-            } else {
-                resultBox.className = "result-box wrong";
-                resultBox.innerHTML = `<strong>❌ 오답입니다. (내가 고른 답: ${userAnswer}번 / 정답: ${q.answer}번)</strong>`;
-            }
-
-            // 해설 추가 표시
-            resultBox.innerHTML += `<div class="explanation"><strong>[해설]</strong> ${q.explanation}</div>`;
-            resultBox.style.display = "block";
-        });
-
-        // 총점 표시 및 상단으로 스크롤
-        const scoreDisplay = document.getElementById('score-display');
-        scoreDisplay.innerHTML = `🎉 채점 완료! 총 10문제 중 ${score}문제를 맞추셨습니다. (${score * 10}점)`;
-        scoreDisplay.style.display = "block";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // 제출 버튼 변경
-        document.getElementById('submit-btn').innerText = "채점 완료 (결과는 아래 각 문제에서 확인)";
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('submit-btn').style.backgroundColor = "#aaa";
+    function getState() {
+      return pageStates[currentPageIndex];
     }
 
-    // 페이지 로드 시 문제 보이기
-    renderQuiz();
-</script>
+    function initExam() {
+      currentQuestionIndex = 0;
+      document.getElementById("result-panel").style.display = "none";
+      renderPageGrid();
+      renderAnswerGrid();
+      renderQuestion();
+      updateCounts();
+      startTimer();
+    }
 
+    function startTimer() {
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(() => {
+        const state = getState();
+        const seconds = Math.floor((Date.now() - state.startedAt) / 1000);
+        const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const ss = String(seconds % 60).padStart(2, "0");
+        document.getElementById("timer").textContent = `${mm}:${ss}`;
+      }, 500);
+    }
+
+    function renderPageGrid() {
+      const grid = document.getElementById("page-grid");
+      grid.innerHTML = "";
+
+      quizPages.forEach((page, index) => {
+        const firstId = page[0].displayNo ?? page[0].id;
+        const lastId = page[page.length - 1].displayNo ?? page[page.length - 1].id;
+        const subjectShort = (page[0].subject || "CBT").split(":")[0].trim();
+        const btn = document.createElement("button");
+        btn.className = "page-btn";
+        if (index === currentPageIndex) btn.classList.add("active");
+        btn.textContent = `${subjectShort} ${firstId}~${lastId}번`;
+        btn.title = page[0].subject || "CBT 모의고사";
+        btn.onclick = () => changePage(index);
+        grid.appendChild(btn);
+      });
+    }
+
+    function changePage(pageIndex) {
+      if (pageIndex < 0 || pageIndex >= quizPages.length) return;
+      currentPageIndex = pageIndex;
+      currentQuestionIndex = 0;
+      document.getElementById("result-panel").style.display = "none";
+      renderPageGrid();
+      renderQuestion();
+      updateCounts();
+      startTimer();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function prevPage() {
+      changePage(currentPageIndex - 1);
+    }
+
+    function nextPage() {
+      changePage(currentPageIndex + 1);
+    }
+
+    function renderQuestion() {
+      const page = getCurrentPage();
+      const state = getState();
+      const q = page[currentQuestionIndex];
+
+      document.getElementById("subject-title").textContent = q.subject || "CBT 모의고사";
+      document.getElementById("question-number").textContent = `${q.displayNo ?? q.id}번 문제`;
+      document.getElementById("question-text").textContent = q.question;
+      document.getElementById("mark-checkbox").checked = state.marked[currentQuestionIndex];
+
+      const optionsEl = document.getElementById("options");
+      optionsEl.innerHTML = "";
+
+      q.options.forEach((optionText, i) => {
+        const optionNumber = i + 1;
+        const label = document.createElement("label");
+        label.className = "option";
+
+        if (state.answers[currentQuestionIndex] === optionNumber) {
+          label.classList.add("selected");
+        }
+
+        if (state.submitted && state.reviewMode) {
+          if (optionNumber === q.answer) label.classList.add("correct-answer");
+          if (state.answers[currentQuestionIndex] === optionNumber && optionNumber !== q.answer) {
+            label.classList.add("wrong-answer");
+          }
+        }
+
+        label.innerHTML = `
+          <input type="radio" name="answer" value="${optionNumber}" ${state.answers[currentQuestionIndex] === optionNumber ? "checked" : ""} ${state.submitted ? "disabled" : ""}>
+          <span>${optionText}</span>
+        `;
+
+        label.addEventListener("click", () => {
+          if (!state.submitted) selectAnswer(optionNumber);
+        });
+
+        optionsEl.appendChild(label);
+      });
+
+      const statusLine = document.getElementById("status-line");
+      const explanation = document.getElementById("explanation");
+
+      if (state.submitted && state.reviewMode) {
+        const userAnswer = state.answers[currentQuestionIndex];
+        const isCorrect = userAnswer === q.answer;
+        statusLine.className = `status-line ${isCorrect ? "correct" : "wrong"}`;
+        statusLine.textContent = isCorrect
+          ? "⭕ 정답입니다."
+          : `❌ 오답입니다. 선택: ${userAnswer ? userAnswer + "번" : "미응답"} / 정답: ${q.answer}번`;
+
+        explanation.style.display = "block";
+        explanation.innerHTML = `<strong>[해설]</strong><br>${q.explanation}`;
+      } else {
+        statusLine.className = "status-line";
+        statusLine.textContent = "";
+        explanation.style.display = "none";
+        explanation.innerHTML = "";
+      }
+
+      document.getElementById("prev-btn").disabled = currentQuestionIndex === 0;
+      document.getElementById("next-btn").disabled = currentQuestionIndex === page.length - 1;
+      document.getElementById("prev-page-btn").disabled = currentPageIndex === 0;
+      document.getElementById("next-page-btn").disabled = currentPageIndex === quizPages.length - 1;
+      document.getElementById("submit-btn").disabled = state.submitted;
+      document.getElementById("side-submit-btn").disabled = state.submitted;
+      document.getElementById("submit-btn").textContent = state.submitted ? "제출 완료" : "최종 제출";
+      document.getElementById("side-submit-btn").textContent = state.submitted ? "제출 완료" : "최종 제출";
+
+      updateCounts();
+      renderAnswerGrid();
+      renderPageGrid();
+    }
+
+    function renderAnswerGrid() {
+      const page = getCurrentPage();
+      const state = getState();
+      const grid = document.getElementById("answer-grid");
+      grid.innerHTML = "";
+
+      page.forEach((q, index) => {
+        const btn = document.createElement("button");
+        btn.className = "nav-num";
+        btn.textContent = q.displayNo ?? q.id;
+
+        if (index === currentQuestionIndex) btn.classList.add("current");
+
+        if (state.submitted && state.reviewMode) {
+          if (state.answers[index] === q.answer) btn.classList.add("correct");
+          else btn.classList.add("wrong");
+        } else {
+          if (state.answers[index] !== null) btn.classList.add("answered");
+          if (state.marked[index]) btn.classList.add("marked");
+        }
+
+        btn.onclick = () => {
+          currentQuestionIndex = index;
+          renderQuestion();
+        };
+
+        grid.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(optionNumber) {
+      const state = getState();
+      state.answers[currentQuestionIndex] = optionNumber;
+      renderQuestion();
+    }
+
+    function toggleMark() {
+      const state = getState();
+      state.marked[currentQuestionIndex] = document.getElementById("mark-checkbox").checked;
+      renderAnswerGrid();
+      updateCounts();
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      const page = getCurrentPage();
+      if (currentQuestionIndex < page.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      }
+    }
+
+    function goFirstUnanswered() {
+      const state = getState();
+      const first = state.answers.findIndex(answer => answer === null);
+      if (first === -1) {
+        alert("미응답 문제가 없습니다.");
+        return;
+      }
+      currentQuestionIndex = first;
+      renderQuestion();
+    }
+
+    function updateCounts() {
+      const page = getCurrentPage();
+      const state = getState();
+      const answeredCount = state.answers.filter(answer => answer !== null).length;
+      const markedCount = state.marked.filter(Boolean).length;
+
+      document.getElementById("answered-count").textContent = `답안 ${answeredCount} / ${page.length}`;
+      const subjectShort = (page[0].subject || "CBT").split(":")[0].trim();
+      document.getElementById("page-title").textContent = `${subjectShort} ${currentPageIndex + 1}페이지 / ${page.length}문제`;
+      document.getElementById("progress-text").innerHTML =
+        `응답: <strong>${answeredCount}</strong> / ${page.length}<br>` +
+        `미응답: <strong>${page.length - answeredCount}</strong><br>` +
+        `검토 표시: <strong>${markedCount}</strong>`;
+    }
+
+    function submitExam() {
+      const page = getCurrentPage();
+      const state = getState();
+      if (state.submitted) return;
+
+      const unanswered = state.answers.filter(answer => answer === null).length;
+
+      if (unanswered > 0) {
+        const ok = confirm(`아직 ${unanswered}문제를 풀지 않았습니다. 그래도 제출할까요?`);
+        if (!ok) return;
+      } else {
+        const ok = confirm("답안을 최종 제출할까요?");
+        if (!ok) return;
+      }
+
+      state.submitted = true;
+      state.reviewMode = false;
+
+      const score = page.reduce((sum, q, index) => {
+        return sum + (state.answers[index] === q.answer ? 1 : 0);
+      }, 0);
+
+      const resultPanel = document.getElementById("result-panel");
+      resultPanel.style.display = "block";
+      document.getElementById("score-big").textContent = `${score * 10}점`;
+      const subjectShort = (page[0].subject || "CBT").split(":")[0].trim();
+      document.getElementById("score-detail").textContent =
+        `${subjectShort} ${currentPageIndex + 1}페이지: 총 ${page.length}문제 중 ${score}문제 정답, ${page.length - score}문제 오답 또는 미응답`;
+
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showReviewMode() {
+      const state = getState();
+      state.submitted = true;
+      state.reviewMode = true;
+      currentQuestionIndex = 0;
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetCurrentPage() {
+      const ok = confirm("현재 페이지 답안을 모두 지우고 처음부터 다시 풀까요?");
+      if (!ok) return;
+
+      const page = getCurrentPage();
+      pageStates[currentPageIndex] = {
+        answers: Array(page.length).fill(null),
+        marked: Array(page.length).fill(false),
+        submitted: false,
+        reviewMode: false,
+        startedAt: Date.now()
+      };
+
+      currentQuestionIndex = 0;
+      document.getElementById("result-panel").style.display = "none";
+      renderQuestion();
+      startTimer();
+    }
+
+    initExam();
+  </script>
 </body>
 </html>
