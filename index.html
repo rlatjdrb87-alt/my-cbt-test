@@ -639,6 +639,124 @@
       font-size: 13px;
     }
 
+
+
+    .wrongnote-panel {
+      display: none;
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto 18px;
+      padding: 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(17, 24, 39, 0.06);
+    }
+
+    .wrongnote-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .wrongnote-title {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .wrongnote-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .wrongnote-select {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0 10px;
+      font-family: inherit;
+      font-weight: 800;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .wrongnote-summary {
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .wrongnote-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .wrongnote-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: #fbfcfe;
+    }
+
+    .wrongnote-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .wrongnote-card-title {
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .wrongnote-card-meta {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .wrongnote-options {
+      margin: 8px 0;
+      display: grid;
+      gap: 5px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .wrongnote-answer-line {
+      margin-top: 8px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: var(--red-light);
+      color: var(--red);
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .wrongnote-explanation {
+      margin-top: 8px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .wrongnote-empty {
+      padding: 18px;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: var(--muted);
+      font-weight: 800;
+      text-align: center;
+      border: 1px dashed var(--line);
+    }
+
     @media (max-width: 860px) {
       .layout {
         grid-template-columns: 1fr;
@@ -743,6 +861,8 @@
       </div>
       <div class="side-actions">
         <button class="btn-dark" onclick="goFirstUnanswered()">미응답 문제로 이동</button>
+        <button class="btn-light" onclick="showWrongNoteLibrary()">오답노트 보기</button>
+        <button class="btn-light" onclick="showCurrentSubjectWrongNotes()">현재 과목 오답</button>
         <button class="btn-blue" id="side-submit-btn" onclick="submitExam()">최종 제출</button>
       </div>
     </aside>
@@ -753,6 +873,20 @@
     <div class="score-big" id="score-big"></div>
     <div class="score-detail" id="score-detail"></div>
     <button class="btn-dark" onclick="showReviewMode()">해설 보면서 다시 확인</button>
+    <button class="btn-blue" onclick="showWrongNoteLibrary()">오답노트 보기</button>
+  </section>
+
+  <section class="wrongnote-panel" id="wrongnote-panel">
+    <div class="wrongnote-head">
+      <div class="wrongnote-title">오답노트 라이브러리</div>
+      <div class="wrongnote-tools">
+        <select class="wrongnote-select" id="wrongnote-subject-select" onchange="renderWrongNotes(this.value)"></select>
+        <button class="btn-light" onclick="hideWrongNoteLibrary()">닫기</button>
+        <button class="btn-red" onclick="clearWrongNotes()">오답노트 초기화</button>
+      </div>
+    </div>
+    <div class="wrongnote-summary" id="wrongnote-summary"></div>
+    <div class="wrongnote-list" id="wrongnote-list"></div>
   </section>
 
   <script>
@@ -8875,13 +9009,89 @@
     let currentQuestionIndex = 0;
     let timerId = null;
 
-    const pageStates = quizPages.map(page => ({
-      answers: Array(page.length).fill(null),
-      marked: Array(page.length).fill(false),
-      submitted: false,
-      reviewMode: false,
-      startedAt: Date.now()
-    }));
+    const CBT_STATE_KEY = "industrialSafetyCbtStateV3";
+    const CBT_WRONGNOTE_KEY = "industrialSafetyCbtWrongNotesV3";
+
+    function createEmptyPageState(page) {
+      return {
+        answers: Array(page.length).fill(null),
+        marked: Array(page.length).fill(false),
+        submitted: false,
+        reviewMode: false,
+        startedAt: Date.now()
+      };
+    }
+
+    function normalizeSavedPageState(savedState, page) {
+      const empty = createEmptyPageState(page);
+      if (!savedState || typeof savedState !== "object") return empty;
+
+      const answers = Array.isArray(savedState.answers) ? savedState.answers.slice(0, page.length) : [];
+      const marked = Array.isArray(savedState.marked) ? savedState.marked.slice(0, page.length) : [];
+
+      while (answers.length < page.length) answers.push(null);
+      while (marked.length < page.length) marked.push(false);
+
+      return {
+        answers,
+        marked: marked.map(Boolean),
+        submitted: Boolean(savedState.submitted),
+        reviewMode: Boolean(savedState.reviewMode),
+        startedAt: Number(savedState.startedAt) || Date.now()
+      };
+    }
+
+    function loadExamState() {
+      try {
+        const raw = localStorage.getItem(CBT_STATE_KEY);
+        if (!raw) return quizPages.map(createEmptyPageState);
+        const parsed = JSON.parse(raw);
+        if (!parsed || parsed.version !== 3 || parsed.pageCount !== quizPages.length || !Array.isArray(parsed.pageStates)) {
+          return quizPages.map(createEmptyPageState);
+        }
+        return quizPages.map((page, index) => normalizeSavedPageState(parsed.pageStates[index], page));
+      } catch (error) {
+        console.warn("저장된 풀이 상태를 불러오지 못했습니다.", error);
+        return quizPages.map(createEmptyPageState);
+      }
+    }
+
+    function saveExamState() {
+      try {
+        localStorage.setItem(CBT_STATE_KEY, JSON.stringify({
+          version: 3,
+          pageCount: quizPages.length,
+          savedAt: Date.now(),
+          currentPageIndex,
+          currentQuestionIndex,
+          pageStates
+        }));
+      } catch (error) {
+        console.warn("풀이 상태 저장 실패", error);
+      }
+    }
+
+    function loadWrongNotes() {
+      try {
+        const raw = localStorage.getItem(CBT_WRONGNOTE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn("오답노트 불러오기 실패", error);
+        return [];
+      }
+    }
+
+    function saveWrongNotes(notes) {
+      try {
+        localStorage.setItem(CBT_WRONGNOTE_KEY, JSON.stringify(notes));
+      } catch (error) {
+        console.warn("오답노트 저장 실패", error);
+      }
+    }
+
+    const pageStates = loadExamState();
 
     function getCurrentPage() {
       return quizPages[currentPageIndex].slice(0, QUESTIONS_PER_PAGE);
@@ -8894,6 +9104,7 @@
     function initExam() {
       currentQuestionIndex = 0;
       document.getElementById("result-panel").style.display = "none";
+      updateWrongNoteSubjectSelect("ALL");
       renderPageGrid();
       renderAnswerGrid();
       renderQuestion();
@@ -8973,6 +9184,7 @@
       currentPageIndex = pageIndex;
       currentQuestionIndex = 0;
       document.getElementById("result-panel").style.display = "none";
+      saveExamState();
       renderPageGrid();
       renderQuestion();
       updateCounts();
@@ -9106,12 +9318,14 @@
     function selectAnswer(optionNumber) {
       const state = getState();
       state.answers[currentQuestionIndex] = optionNumber;
+      saveExamState();
       renderQuestion();
     }
 
     function toggleMark() {
       const state = getState();
       state.marked[currentQuestionIndex] = document.getElementById("mark-checkbox").checked;
+      saveExamState();
       renderAnswerGrid();
       updateCounts();
     }
@@ -9214,6 +9428,180 @@
       };
     }
 
+
+    function getQuestionKey(q) {
+      return `${q.subject || "기타"}|${q.displayNo ?? q.id}`;
+    }
+
+    function getAllSubjects() {
+      return [...new Set(quizPages.flat().map(q => q.subject || "기타"))];
+    }
+
+    function collectWrongNotesFromCurrentState() {
+      const notes = [];
+      quizPages.forEach((page, pageIndex) => {
+        page.slice(0, QUESTIONS_PER_PAGE).forEach((q, questionIndex) => {
+          const state = pageStates[pageIndex];
+          const userAnswer = state.answers[questionIndex];
+          const isAnswered = userAnswer !== null && userAnswer !== undefined;
+          const isWrong = isAnswered ? userAnswer !== q.answer : Boolean(state.submitted);
+          if (!isWrong) return;
+
+          notes.push({
+            key: getQuestionKey(q),
+            id: q.id,
+            displayNo: q.displayNo ?? q.id,
+            subject: q.subject || "기타",
+            question: q.question,
+            options: q.options,
+            answer: q.answer,
+            explanation: q.explanation,
+            userAnswer: isAnswered ? userAnswer : null,
+            pageIndex,
+            questionIndex,
+            savedAt: Date.now()
+          });
+        });
+      });
+      return notes;
+    }
+
+    function saveWrongNotesFromCurrentState() {
+      const existing = loadWrongNotes();
+      const existingMap = new Map(existing.map(note => [note.key, note]));
+      collectWrongNotesFromCurrentState().forEach(note => existingMap.set(note.key, note));
+
+      // 이미 맞힌 문제는 오답노트에서 자동 제거한다.
+      quizPages.forEach((page, pageIndex) => {
+        page.slice(0, QUESTIONS_PER_PAGE).forEach((q, questionIndex) => {
+          const userAnswer = pageStates[pageIndex].answers[questionIndex];
+          if (userAnswer === q.answer) existingMap.delete(getQuestionKey(q));
+        });
+      });
+
+      const merged = [...existingMap.values()].sort((a, b) => {
+        const sa = String(a.subject).localeCompare(String(b.subject), "ko");
+        if (sa !== 0) return sa;
+        return Number(a.displayNo) - Number(b.displayNo);
+      });
+      saveWrongNotes(merged);
+      return merged;
+    }
+
+    function updateWrongNoteSubjectSelect(selectedSubject = "ALL") {
+      const select = document.getElementById("wrongnote-subject-select");
+      if (!select) return;
+      const notes = loadWrongNotes();
+      const subjects = [...new Set(notes.map(note => note.subject))];
+
+      select.innerHTML = "";
+      const allOption = document.createElement("option");
+      allOption.value = "ALL";
+      allOption.textContent = `전체 오답 ${notes.length}개`;
+      select.appendChild(allOption);
+
+      subjects.forEach(subject => {
+        const option = document.createElement("option");
+        option.value = subject;
+        option.textContent = `${subject} · ${notes.filter(note => note.subject === subject).length}개`;
+        select.appendChild(option);
+      });
+
+      select.value = selectedSubject;
+      if (select.value !== selectedSubject) select.value = "ALL";
+    }
+
+    function renderWrongNotes(subjectFilter = "ALL") {
+      updateWrongNoteSubjectSelect(subjectFilter);
+      const panel = document.getElementById("wrongnote-panel");
+      const summary = document.getElementById("wrongnote-summary");
+      const list = document.getElementById("wrongnote-list");
+      if (!panel || !summary || !list) return;
+
+      const allNotes = loadWrongNotes();
+      const notes = subjectFilter === "ALL" ? allNotes : allNotes.filter(note => note.subject === subjectFilter);
+      panel.style.display = "block";
+
+      const subjectCounts = getAllSubjects()
+        .map(subject => `${subject.replace(/^제/, "제")} ${allNotes.filter(note => note.subject === subject).length}개`)
+        .join(" · ");
+
+      summary.innerHTML =
+        `저장된 오답/미응답: <strong>${allNotes.length}</strong>개` +
+        (subjectCounts ? `<br>${subjectCounts}` : "") +
+        `<br>최종 제출 시 오답노트가 자동 저장되며, 브라우저를 껐다 켜도 유지됩니다.`;
+
+      if (notes.length === 0) {
+        list.innerHTML = `<div class="wrongnote-empty">저장된 오답이 없습니다. 문제를 풀고 최종 제출하면 오답만 여기에 저장됩니다.</div>`;
+        return;
+      }
+
+      list.innerHTML = notes.map(note => {
+        const selectedText = note.userAnswer ? `${note.userAnswer}번` : "미응답";
+        const correctText = `${note.answer}번`;
+        const optionsHtml = (note.options || []).map(option => `<div>${option}</div>`).join("");
+        return `
+          <article class="wrongnote-card">
+            <div class="wrongnote-card-head">
+              <div class="wrongnote-card-title">${note.subject} · ${note.displayNo}번<br>${note.question}</div>
+              <div class="wrongnote-card-meta">ID ${note.id}</div>
+            </div>
+            <div class="wrongnote-options">${optionsHtml}</div>
+            <div class="wrongnote-answer-line">선택: ${selectedText} / 정답: ${correctText}</div>
+            <div class="wrongnote-explanation"><strong>[해설]</strong><br>${note.explanation || "해설 없음"}</div>
+            <div style="margin-top:10px;">
+              <button class="btn-light" onclick="goToWrongNoteQuestion('${String(note.subject).replace(/'/g, "\\'")}', ${Number(note.displayNo)})">해당 문제로 이동</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function showWrongNoteLibrary() {
+      saveWrongNotesFromCurrentState();
+      renderWrongNotes("ALL");
+      document.getElementById("wrongnote-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showCurrentSubjectWrongNotes() {
+      saveWrongNotesFromCurrentState();
+      const page = getCurrentPage();
+      const subject = page[0]?.subject || "ALL";
+      renderWrongNotes(subject);
+      document.getElementById("wrongnote-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function hideWrongNoteLibrary() {
+      const panel = document.getElementById("wrongnote-panel");
+      if (panel) panel.style.display = "none";
+    }
+
+    function clearWrongNotes() {
+      const ok = confirm("저장된 오답노트를 모두 삭제할까요? 풀이 답안은 유지됩니다.");
+      if (!ok) return;
+      saveWrongNotes([]);
+      renderWrongNotes("ALL");
+    }
+
+    function goToWrongNoteQuestion(subject, displayNo) {
+      for (let pageIndex = 0; pageIndex < quizPages.length; pageIndex++) {
+        const questionIndex = quizPages[pageIndex]
+          .slice(0, QUESTIONS_PER_PAGE)
+          .findIndex(q => (q.subject || "기타") === subject && Number(q.displayNo ?? q.id) === Number(displayNo));
+        if (questionIndex >= 0) {
+          currentPageIndex = pageIndex;
+          currentQuestionIndex = questionIndex;
+          pageStates[pageIndex].submitted = true;
+          pageStates[pageIndex].reviewMode = true;
+          saveExamState();
+          renderQuestion();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+      }
+      alert("해당 문제를 현재 문항 데이터에서 찾지 못했습니다.");
+    }
+
     function submitExam() {
       const stats = getAllExamStats();
 
@@ -9231,6 +9619,8 @@
         state.submitted = true;
         state.reviewMode = false;
       });
+      saveExamState();
+      saveWrongNotesFromCurrentState();
 
       if (timerId) clearInterval(timerId);
 
@@ -9280,6 +9670,7 @@
         state.submitted = true;
         state.reviewMode = true;
       });
+      saveExamState();
 
       currentQuestionIndex = 0;
 
@@ -9305,6 +9696,7 @@
 
       currentQuestionIndex = 0;
       document.getElementById("result-panel").style.display = "none";
+      saveExamState();
       renderQuestion();
       startTimer();
     }
@@ -9358,6 +9750,7 @@
       });
     }
 
+    window.addEventListener("beforeunload", saveExamState);
     setupKeyboardShortcuts();
     initExam();
   </script>
